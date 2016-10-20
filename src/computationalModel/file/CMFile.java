@@ -2,7 +2,6 @@ package computationalModel.file;
 
 import computationalModel.line.CMLine;
 
-import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -108,7 +107,8 @@ public class CMFile {
         return lines;
     }
     public ArrayList<String> getOnlyInput() {
-        /* Возращает список имён, которые нельзя получить из CM(но есть в какой-то строке во входящих файлах)
+        /*
+        * Возращает список имён, которые нельзя получить из CM(но есть в какой-то строке во входящих файлах)
         * */
         if(onlyInput == null){
             setOnlyInput();

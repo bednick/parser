@@ -23,11 +23,6 @@ public class LogCollector {
         this.working = working;
         this.log = new ArrayList<>();
     }
-    public LogCollector(boolean working){
-        this.nameLog = "logParser.log";
-        this.working = working;
-        this.log = new ArrayList<>();
-    }
 
     public boolean isWorking() {
         return working;
@@ -38,9 +33,10 @@ public class LogCollector {
     public String getNameLog() {
         return nameLog;
     }
-    public void add(String string) {
+    public void addLine(String string) {
         if(working){
             log.add(string);
+            log.add("\n");
         }
     }
     public void push() throws IOException {

@@ -54,9 +54,9 @@ public class RubbishCollector {
                 File file = new File(str);
                 if (file.exists()) {
                     if(file.delete()) {
-                        log.add("Удаляется файл " + file.getName());
+                        log.addLine("detele file " + file.getName());
                     } else{
-                        log.add("Не удалось удалить файл " + file.getName());
+                        log.addLine("error delete file " + file.getName());
                     }
                 }
             }

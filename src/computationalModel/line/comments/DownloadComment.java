@@ -21,7 +21,7 @@ public class DownloadComment {
             map.get(buf[0]).setLastComment(buf[1]);
             return map.get(buf[0]);
         } else {
-            System.out.println("Comment "+ buf[0] +" не распознан");
+            System.err.println("Comment "+ buf[0] +" не распознан");
         }
         return null;
     }

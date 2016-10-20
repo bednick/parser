@@ -28,13 +28,40 @@ public class Parser {
         this.rubbishCollector = new RubbishCollector(this.logCollector);
     }
     public void start() throws IOException {
+        /*
+        * Основная логика parser'а
+        * */
         if(parameters.namesFileOut.size() == 0){
             return;
         }
-        for(String str: parameters.getNamesFileCM()) {
+        for(String str: parameters.getNamesFileCM()) {//считываем все входные CM
             cmFile.readFile(str);
         }
-        CMFile tree = getTree(cmFile, "");
+        try {
+
+            for (String nameOut : parameters.getNamesFileOut()) {
+                boolean errorPerform = false;
+                CMFile tree = getTree(cmFile, nameOut);
+                CMFile branch;
+                do {
+                    checkCanPerform(tree);
+                    branch = getBranch(tree);
+                    logCollector.addLine("selected branch");
+                    if (branch.getSize() == 0) {
+                        logCollector.addLine("branch is empty");
+                        errorPerform = true;
+                        break;
+                    }
+                } while (!performBranch(branch));
+                if (errorPerform) {
+                    logCollector.addLine("can not be obtained " + nameOut);
+                    System.err.println("can not be obtained " + nameOut);
+                    return;
+                }
+            }
+        } finally {
+            rubbishCollector.clear(parameters.getNamesFileOut());
+        }
     }
     public void checkCanPerform(CMFile cmFile) {
         /*
@@ -111,10 +138,40 @@ public class Parser {
         }
         return new CMFile(newTree);
     }
+    public CMFile getBranch(CMFile tree, String nameResult){
+        int countColor = 1;
+        boolean isTime = (  parameters.isTime() && !parameters.isMemory() )
+                      || ( !parameters.isTime() && !parameters.isMemory() );
+
+        //первая итерация алгоритма
+        for(CMLine cmLine: tree.getLines()) {
+            boolean isFirstLayer = false; // первый слой - команды, во вход. файлах которых есть файл, не получаемый из CM
+            for(String fileIn: cmLine.getIn()) {
+                if (tree.getOnlyInput().contains(fileIn)) {
+                    if( isTime ){ // опт по времени
+                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeightTime());
+                        cmLine.getProperties().setColor(countColor);
+                        ++countColor;
+
+                    } else { // иначе по памяти
+                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeightMemory());
+                        cmLine.getProperties().setColor(countColor);
+                        ++countColor;
+                    }
+                    isFirstLayer = true;
+                    break;
+                }
+            }
+            if(!isFirstLayer) {
+                cmLine.getProperties().setWeight(cmLine.getProperties().INFINITEWEIGHT);
+            }
+        }
+        return null;
+    }
     public boolean performBranch(CMFile branch) throws IOException {
         boolean flag = true;
         lighthouse.error = false;
-        int count = 0;
+        int count = 0; //количесто выполненых операций
         while(flag){
             for (CMLine line : branch.getLines()) {
                 if(line.getFlags().isStart()){ // если строка уже была запушенна ранее, то и проверять её не нужно более
@@ -173,8 +230,8 @@ public class Parser {
     }
     public boolean performCMLine(CMLine cmLine) throws IOException {
         try {
+            logCollector.addLine("start " + cmLine.getCommand());
             cmLine.getFlags().setStart(true);
-
             Process pr = Runtime.getRuntime().exec(cmLine.getCommand());
             while (pr.isAlive()) {
                 try {
@@ -184,13 +241,15 @@ public class Parser {
                     return false;
                 }
             }
-            boolean rez = pr.exitValue() == cmLine.getProperties().getCorrectReturnValue();
+            boolean rez = ( pr.exitValue() == cmLine.getProperties().getCorrectReturnValue() );
             if(!rez){
                 cmLine.getFlags().setCanPerform(false);
+                logCollector.addLine("incorrect return value " + cmLine.getCommand());
             }
             return rez;
         } finally {
             cmLine.getFlags().setFinish(true);
+            logCollector.addLine("finish " + cmLine.getCommand());
         }
     }
     public static void main(String[] args) {
@@ -258,13 +317,15 @@ public class Parser {
         }
     }
     public class Lighthouse{
+        /*
+        * Вспомогательный класс, используется потоками для общения между собой
+        * Хранит в себе количество выполняемых задач, и метку
+        * указывающую на то, что во время выполнения одной из задач произошла ошибка
+        * */
         private int count;
         private volatile boolean error;
         public Lighthouse(){
             count = 0;
-        }
-        public synchronized int getCount(){
-            return count;
         }
         public synchronized void increment(){
             count++;

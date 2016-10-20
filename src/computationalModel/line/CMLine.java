@@ -1,5 +1,8 @@
 package computationalModel.line;
 
+import computationalModel.line.comments.Comment;
+import computationalModel.line.comments.DownloadComment;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +34,14 @@ public class CMLine implements Comparable<CMLine>{
         }
         this.properties = new Properties();
         this.flags = new Flags();
+        for(String com: comments) {
+            Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);
+            if(comment != null) {
+               comment.correct(this, com.split(Comment.DELIMITER, 2)[1]);
+            } else {
+                System.err.println("invalid format comment :" + com);
+            }
+        }
     }
     public String[] getIn() {
         return in;
@@ -52,9 +63,21 @@ public class CMLine implements Comparable<CMLine>{
     }
     @Override
     public int compareTo(CMLine o) {
-        return  command.compareTo(o.command);
+        if(this == o){
+            return 0;
+        }
+        if(command.compareTo(o.command) == 0){
+            if(in.length != o.in.length){
+                return in.length - o.in.length;
+            } else if(out.length != o.out.length){
+                return out.length - o.out.length;
+            } else{
+                return 0;
+            }
+        } else {
+            return command.compareTo(o.command);
+        }
     }
-
 
     public class Flags {
         /**
@@ -111,9 +134,11 @@ public class CMLine implements Comparable<CMLine>{
         * */
         public final byte MAXWEIGHT = 100;
         public final byte MINWEIGHT = 0;
+        public final int DEFAULTCOLOR = -1;
+        public final int INFINITEWEIGHT = Integer.MAX_VALUE;
 
-
-        private byte weight;        //вес, используемый при работе(вычесляется на основе остальных весов)
+        private int weight;        //вес, используемый при работе( при вычислении оптимального пути)
+        private int color;         //используется при выборе оптимального пути ()
         private byte weightTime;    //вес, отвечающий за скорость работы
         private byte weightMemory;  //вес, отвечающий за память, занимающую процессом
         private int correctReturnValue; // Какое возвращаемое значение считать корректным
@@ -121,16 +146,20 @@ public class CMLine implements Comparable<CMLine>{
         private ArrayList<String> filesNotRubbish;
 
         public Properties(){
-            weight = (MAXWEIGHT - MINWEIGHT) / 2;
-            weightTime = (MAXWEIGHT - MINWEIGHT) / 2;
-            weightMemory = (MAXWEIGHT - MINWEIGHT) / 2;
-            correctReturnValue = 0;
-            filesMarks = null;
-            filesNotRubbish = null;
+            this.weight = (MAXWEIGHT - MINWEIGHT) / 2;
+            this.color = DEFAULTCOLOR;
+            this.weightTime = (MAXWEIGHT - MINWEIGHT) / 2;
+            this.weightMemory = (MAXWEIGHT - MINWEIGHT) / 2;
+            this.correctReturnValue = 0;
+            this.filesMarks = null;
+            this.filesNotRubbish = null;
         }
 
-        public byte getWeight() {
+        public int getWeight() {
             return weight;
+        }
+        public int getColor() {
+            return color;
         }
         public byte getWeightMemory() {
             return weightMemory;
@@ -156,14 +185,11 @@ public class CMLine implements Comparable<CMLine>{
         public void setCorrectReturnValue(int correctReturnValue) {
             this.correctReturnValue = correctReturnValue;
         }
-        public void setWeight(byte weight) {
-            if(weight > MAXWEIGHT) {
-                this.weight = MAXWEIGHT;
-            } else if(weight < MINWEIGHT) {
-                this.weight = MINWEIGHT;
-            } else {
-                this.weight = weight;
-            }
+        public void setWeight(int weight) {
+            this.weight = weight;
+        }
+        public void setColor(int color) {
+            this.color = color;
         }
         public void setWeightMemory(byte weightMemory) {
             if(weightMemory > MAXWEIGHT) {
