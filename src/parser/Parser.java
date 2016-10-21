@@ -215,6 +215,12 @@ public class Parser {
                                         }
                                     }
                                     minLine.getProperties().setColor(cmLine.getProperties().getColor());
+                                    cmLine.getProperties().setWeight(minLine.getProperties().getWeightTime());
+                                    if(isTime){
+                                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeight() + cmLine.getProperties().getWeightTime());
+                                    } else {
+                                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeight() + cmLine.getProperties().getWeightMemory());
+                                    }
                                     change = true;
                                 }
 
