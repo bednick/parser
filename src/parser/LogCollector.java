@@ -50,7 +50,6 @@ public class LogCollector {
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
                     for (String line: log) {
                         writer.write(line);
-                        writer.newLine();
                         System.out.println("log " + line);
                     }
                     writer.flush();

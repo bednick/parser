@@ -10,7 +10,8 @@ import java.util.PriorityQueue;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Created by BODY on 18.10.2016.
+ * Основной класс
+ *
  */
 public class Parser {
     private Parameters parameters;
@@ -18,6 +19,7 @@ public class Parser {
     private CMFile cmFile;
     private LogCollector logCollector;
     private RubbishCollector rubbishCollector;
+    private ConfigFile configFile;
 
 
     public Parser(String[] args) {
@@ -26,6 +28,7 @@ public class Parser {
         this.cmFile  = new CMFile();
         this.logCollector = new LogCollector();
         this.rubbishCollector = new RubbishCollector(this.logCollector);
+        this.configFile = new ConfigFile("");
     }
     public void start() throws IOException {
         /*
@@ -37,15 +40,15 @@ public class Parser {
         for(String str: parameters.getNamesFileCM()) {//считываем все входные CM
             cmFile.readFile(str);
         }
+        configFile.updateCMFile(cmFile);
         try {
-
             for (String nameOut : parameters.getNamesFileOut()) {
                 boolean errorPerform = false;
                 CMFile tree = getTree(cmFile, nameOut);
                 CMFile branch;
                 do {
                     checkCanPerform(tree);
-                    branch = getBranch(tree);
+                    branch = getBranch(tree, nameOut);
                     logCollector.addLine("selected branch");
                     if (branch.getSize() == 0) {
                         logCollector.addLine("branch is empty");
@@ -61,6 +64,7 @@ public class Parser {
             }
         } finally {
             rubbishCollector.clear(parameters.getNamesFileOut());
+            logCollector.push();
         }
     }
     public void checkCanPerform(CMFile cmFile) {
@@ -142,33 +146,100 @@ public class Parser {
         int countColor = 1;
         boolean isTime = (  parameters.isTime() && !parameters.isMemory() )
                       || ( !parameters.isTime() && !parameters.isMemory() );
+        ArrayList<CMLine> branch = new ArrayList<CMLine>();
 
+
+        //// TODO: 21.10.2016 "обнулять" все используемые флаги и метки
+        //// TODO: 21.10.2016 проверять флаг на возможность выполнения
+        
         //первая итерация алгоритма
         for(CMLine cmLine: tree.getLines()) {
-            boolean isFirstLayer = false; // первый слой - команды, во вход. файлах которых есть файл, не получаемый из CM
-            for(String fileIn: cmLine.getIn()) {
-                if (tree.getOnlyInput().contains(fileIn)) {
-                    if( isTime ){ // опт по времени
-                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeightTime());
-                        cmLine.getProperties().setColor(countColor);
-                        ++countColor;
+            if(cmLine.getFlags().isCanPerform()) {
+                boolean isFirstLayer = false; // первый слой - команды, во вход. файлах которых есть файл, не получаемый из CM
+                for (String fileIn : cmLine.getIn()) {
+                    if (tree.getOnlyInput().contains(fileIn)) {
+                        if (isTime) { // опт по времени
+                            cmLine.getProperties().setWeight(cmLine.getProperties().getWeightTime());
+                            //cmLine.getProperties().setColor(countColor);
+                            //++countColor;
 
-                    } else { // иначе по памяти
-                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeightMemory());
-                        cmLine.getProperties().setColor(countColor);
-                        ++countColor;
+                        } else { // иначе по памяти
+                            cmLine.getProperties().setWeight(cmLine.getProperties().getWeightMemory());
+                            //cmLine.getProperties().setColor(countColor);
+                            //++countColor;
+                        }
+                        isFirstLayer = true;
+                        break;
                     }
-                    isFirstLayer = true;
-                    break;
                 }
-            }
-            if(!isFirstLayer) {
-                cmLine.getProperties().setWeight(cmLine.getProperties().INFINITEWEIGHT);
+                if (!isFirstLayer) {
+                    cmLine.getProperties().setWeight(cmLine.getProperties().INFINITEWEIGHT);
+                }
+                cmLine.getProperties().setColor(countColor);
+                ++countColor;
             }
         }
-        return null;
+        //
+        boolean change = true;
+        while(change) {
+            change = false;
+            //// TODO: 21.10.2016 реализовать нахождение min суммы из входных файлов
+            // пока реализовать только minimum покомпонентно
+            for (CMLine cmLine : tree.getLines()) {
+                if(cmLine.getFlags().isCanPerform()) {  // если можно выполнять
+                    if(!cmLine.getFlags().isFinish()) { // если раньше не запускали
+                        for (String nameIn : cmLine.getIn()) {
+                            if((new File(nameIn).exists())){ //если это файл есть, его получать не нужно
+                                continue;
+                            }
+                            if(!cmFile.getOnlyInput().contains(nameIn)) { // если это не первый слой(он уже выставлен)
+                                boolean isAllNotINFINITEWEIGHT = true;
+                                for (CMLine sources: cmFile.getForOut(nameIn)) {
+                                    if(sources.getFlags().isCanPerform()) {  // если можно выполнять
+                                        if (!sources.getFlags().isFinish()) { // если раньше не запускали
+                                            if (sources.getProperties().getWeight() == sources.getProperties().INFINITEWEIGHT) {
+                                                isAllNotINFINITEWEIGHT = false;
+                                            }
+                                        }
+                                    }
+                                }
+                                if(isAllNotINFINITEWEIGHT) {
+                                    int minWeight = Integer.MAX_VALUE;
+                                    CMLine minLine = null;
+                                    for (CMLine sources : cmFile.getForOut(nameIn)) {
+                                        if (sources.getProperties().getWeight() != sources.getProperties().INFINITEWEIGHT) {
+                                            if (minWeight > sources.getProperties().getWeight()) {
+                                                minWeight = sources.getProperties().getWeight();
+                                                minLine = sources;
+                                            }
+                                        }
+                                    }
+                                    minLine.getProperties().setColor(cmLine.getProperties().getColor());
+                                    change = true;
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        int minWeight = Integer.MAX_VALUE;
+        CMLine min = null;
+        for(CMLine line: cmFile.getForOut(nameResult)){
+            if(line.getProperties().getWeight() < minWeight){
+                min = line;
+                minWeight = line.getProperties().getWeight();
+            }
+        }
+        for(CMLine line: cmFile.getLines()){
+            if(min.getProperties().getColor() == line.getProperties().getColor()){
+                branch.add(line);
+            }
+        }
+        return new CMFile(branch);
     }
-    public boolean performBranch(CMFile branch) throws IOException {
+    private boolean performBranch(CMFile branch) throws IOException {
         boolean flag = true;
         lighthouse.error = false;
         int count = 0; //количесто выполненых операций
@@ -228,7 +299,7 @@ public class Parser {
 
         return true;
     }
-    public boolean performCMLine(CMLine cmLine) throws IOException {
+    private boolean performCMLine(CMLine cmLine) throws IOException {
         try {
             logCollector.addLine("start " + cmLine.getCommand());
             cmLine.getFlags().setStart(true);
