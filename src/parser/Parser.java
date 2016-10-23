@@ -45,15 +45,18 @@ public class Parser {
         try {
             for (String nameOut : parameters.getNamesFileOut()) {
                 CMTree tree = new CMTree(cmFile, nameOut);
+                System.out.println(tree.toString());
                 do{
                     boolean isCanPerform = false;
                     for (CMTreeVertex ver: setMinWeight(tree).getHead()) {
                         if(ver.getCmLine().getFlags().isCanPerform()){
                             isCanPerform = true;
+                            break;
                         }
                     }
+                    System.out.println(tree.toString());
                     if(!isCanPerform){
-                        System.out.println("file '" + nameOut + "' can not get");
+                        System.out.println("file '" + nameOut + "' can not get!");
                         return;
                     }
                 }while(performMinBranch(tree));
@@ -153,7 +156,7 @@ public class Parser {
         return performCMFile(new CMFile(branch));
     }
 
-    private boolean performCMLine(CMLine cmLine) throws IOException {
+    private boolean performCMLine(CMLine cmLine) {
         try {
             logCollector.addLine("start " + cmLine.getCommand());
             cmLine.getFlags().setStart(true);
@@ -172,6 +175,9 @@ public class Parser {
                 logCollector.addLine("incorrect return value " + cmLine.getCommand());
             }
             return rez;
+        } catch (IOException e) {
+            logCollector.addLine(e.toString());
+            return false;
         } finally {
             cmLine.getFlags().setFinish(true);
             logCollector.addLine("finish " + cmLine.getCommand());

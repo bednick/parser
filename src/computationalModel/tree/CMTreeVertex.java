@@ -38,5 +38,8 @@ public class CMTreeVertex {
     public CMLine getCmLine(){
         return cmLine;
     }
-
+    @Override
+    public String toString(){
+        return cmLine.toString();
+    }
 }

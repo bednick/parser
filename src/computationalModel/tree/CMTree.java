@@ -44,4 +44,36 @@ public class CMTree {
     public ArrayList<CMTreeVertex> getHead(){
         return head;
     }
+    @Override
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
+        Queue<CMTreeVertex> queue = new LinkedList<CMTreeVertex>();
+
+        stringBuilder.append("CMTree nameHead=");
+        stringBuilder.append(nameHead);
+        stringBuilder.append("\n");
+        for (CMTreeVertex vertex: head) {
+            queue.add(vertex);
+            stringBuilder.append(vertex);
+            stringBuilder.append(" isCanPerform=");
+            stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
+            stringBuilder.append("\n");
+        }
+
+        while(queue.size() > 0) {
+            CMTreeVertex cmTreeVertex = queue.poll();
+            for(String nameIn: cmTreeVertex.getCmLine().getIn()) {
+                for (CMTreeVertex vertex: cmTreeVertex.getIn(nameIn)) {
+                    queue.add(vertex);
+                    stringBuilder.append(vertex);
+                    stringBuilder.append(" isCanPerform=");
+                    stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
+                    stringBuilder.append("\n");
+                }
+            }
+        }
+        stringBuilder.append("*\t*\t*\t*");
+        stringBuilder.append("\n");
+        return stringBuilder.toString();
+    }
 }
