@@ -28,16 +28,16 @@ public class CMLine implements Comparable<CMLine>{
         this.out = ((line.split(DELIMITERROLE,3)[1]).split(DELIMITER));
         this.command = line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[0];
         if(line.split(DELIMITERROLE,3)[2].split(DELIMITERCOMMENT,2).length == 1) {
-            this.comments = null;
+            this.comments = new String[0];
         } else{
             this.comments = ((line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[1]).split(DELIMITER));
         }
         this.properties = new Properties();
         this.flags = new Flags();
-        for(String com: comments) {
+        for (String com : comments) {
             Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);
-            if(comment != null) {
-               comment.correct(this, com.split(Comment.DELIMITER, 2)[1]);
+            if (comment != null) {
+                comment.correct(this, com.split(Comment.DELIMITER, 2)[1]);
             } else {
                 System.err.println("invalid format comment :" + com);
             }
@@ -78,7 +78,22 @@ public class CMLine implements Comparable<CMLine>{
             return command.compareTo(o.command);
         }
     }
-
+    @Override
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
+        for(String str: in) {
+            stringBuilder.append(str);
+            stringBuilder.append(" ");
+        }
+        stringBuilder.append(";");
+        for(String str: out) {
+            stringBuilder.append(str);
+            stringBuilder.append(" ");
+        }
+        stringBuilder.append(";");
+        stringBuilder.append(command);
+        return stringBuilder.toString();
+    }
     public class Flags {
         /**
          * Класс, хранящий в себе все флаги класса CMLine,

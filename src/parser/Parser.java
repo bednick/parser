@@ -2,11 +2,12 @@ package parser;
 
 import computationalModel.file.CMFile;
 import computationalModel.line.CMLine;
+import computationalModel.tree.CMTree;
+import computationalModel.tree.CMTreeVertex;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -43,209 +44,140 @@ public class Parser {
         configFile.updateCMFile(cmFile);
         try {
             for (String nameOut : parameters.getNamesFileOut()) {
-                boolean errorPerform = false;
-                CMFile tree = getTree(cmFile, nameOut);
-                CMFile branch;
-                do {
-                    checkCanPerform(tree);
-                    branch = getBranch(tree, nameOut);
-                    logCollector.addLine("selected branch");
-                    if (branch.getSize() == 0) {
-                        logCollector.addLine("branch is empty");
-                        errorPerform = true;
-                        break;
+                CMTree tree = new CMTree(cmFile, nameOut);
+                do{
+                    boolean isCanPerform = false;
+                    for (CMTreeVertex ver: setMinWeight(tree).getHead()) {
+                        if(ver.getCmLine().getFlags().isCanPerform()){
+                            isCanPerform = true;
+                        }
                     }
-                } while (!performBranch(branch));
-                if (errorPerform) {
-                    logCollector.addLine("can not be obtained " + nameOut);
-                    System.err.println("can not be obtained " + nameOut);
-                    return;
-                }
+                    if(!isCanPerform){
+                        System.out.println("file '" + nameOut + "' can not get");
+                        return;
+                    }
+                }while(performMinBranch(tree));
             }
         } finally {
             rubbishCollector.clear(parameters.getNamesFileOut());
             logCollector.push();
         }
     }
-    public void checkCanPerform(CMFile cmFile) {
+
+    private CMTree setMinWeight(CMTree tree){
         /*
-        * Помечает все вершины, которые нельзя получить из CMFile
+        * выставляет у каждой вершины её вес(зависит от параметров Parser'a)
+        * если вершина является недоступной, помечает это
         * */
-        for (CMLine cmLine: cmFile.getLines()) {
-            for (String nameIn: cmLine.getIn()) {
-                if(cmFile.getOnlyInput().contains(nameIn)){
-                    if( !(new File(nameIn).exists()) ){
-                        cmLine.getFlags().setCanPerform(false);
+        Queue<CMTreeVertex> queue = new LinkedList<CMTreeVertex>(); // Для правильного добавления в стек
+        Stack<CMTreeVertex> stack = new Stack<CMTreeVertex>();      // Последовательность всех вершин, так чтобы при доставании элемента
+                                                                    // у всех входящих вершин были выставлены веса
+        boolean isTime = ( parameters.isTime() && !parameters.isMemory())  //определяем, по какому критерию ищем min вес
+                      || (!parameters.isTime() && !parameters.isMemory());
+        for(CMTreeVertex head: tree.getHead()){
+            queue.add(head);
+            stack.add(head);
+        }
+        CMTreeVertex vertex;
+        while((vertex = queue.poll()) != null){ //заполняем стек
+            for (String nameIn: vertex.getCmLine().getIn()) {
+                for (CMTreeVertex inVertex : vertex.getIn(nameIn)) {
+                    if(!stack.contains(inVertex)) {
+                        queue.add(inVertex);
+                        stack.add(inVertex);
                     }
                 }
             }
         }
-        boolean flag = true;
-        while(flag){
-            flag = false;
-            for (CMLine cmLine: cmFile.getLines()) {
-                if( cmLine.getFlags().isCanPerform() ) { // проверяются все, у которых стоит влаг, что их можно получить
-                    for (String nameIn : cmLine.getIn()) {
-                        if ( ! cmFile.getOnlyInput().contains(nameIn) ) {
-                            boolean ifAvailable = false;
-                            for (CMLine cmIn : cmFile.getForOut(nameIn)) {
-                                if (cmIn.getFlags().isCanPerform()) {
-                                    ifAvailable = true;
+        while(!stack.empty()){
+            vertex = stack.pop();      //берём эмелент и находим минимальный вес
+            if(vertex.getCmLine().getFlags().isCanPerform()) { // при условии, что эту строчку можно выполнить
+                int minWeightVertex = 0;
+                vertex.getCmLine().getProperties().setWeight(0);
+                for (String nameIn : vertex.getCmLine().getIn()) {
+                    int minWeightFile = Integer.MAX_VALUE;      //минимальный вес, во всех входящих строчках, для ОТДЕЛЬНОГО ВХОДНОГО ФАЙЛА
+                    CMTreeVertex minInCMTreeVertex = null;
+                    if((new File(nameIn).exists())) {   // если такой файл существует
+                        minWeightFile = 0;
+                    } else {
+                        for (CMTreeVertex inVertex : vertex.getIn(nameIn)) {
+                            if (inVertex.getCmLine().getFlags().isCanPerform()) {
+                                if(isTime){
+                                    if(inVertex.getCmLine().getProperties().getWeightTime() < minWeightFile){
+                                        minWeightFile = inVertex.getCmLine().getProperties().getWeightTime();
+                                        minInCMTreeVertex = inVertex;
+                                    }
+                                } else {
+                                    if(inVertex.getCmLine().getProperties().getWeightTime() < minWeightFile){
+                                        minWeightFile = inVertex.getCmLine().getProperties().getWeightMemory();
+                                        minInCMTreeVertex = inVertex;
+                                    }
                                 }
-                            }
-                            if (!ifAvailable) {
-                                cmLine.getFlags().setCanPerform(false);
-                                flag = true;
                             }
                         }
                     }
+                    if(minWeightFile == Integer.MAX_VALUE){
+                        vertex.getCmLine().getFlags().setCanPerform(false);
+                    }
+                    minWeightVertex += minWeightFile;
+                    vertex.setMinInVertex(nameIn, minInCMTreeVertex);
                 }
+                vertex.getCmLine().getProperties().setWeight(minWeightVertex);
             }
-        }
+        } // у всех вершин выставлен вес
+        return tree;
     }
-    public CMFile getTree(CMFile cmFile, String nameResult) {
-        /*
-        * Получение дерева зависимостей, по имени вершины
-        * С учётом того, что некоторые вершины мы получить не сможем(их мы не добавляем)
-        * */
-        ArrayList<CMLine> newTree = new ArrayList<>();
-        PriorityQueue<String> queueName = new PriorityQueue<>();
-        PriorityQueue<CMLine> queueCMLine = new PriorityQueue<>();
-
-        for (CMLine cm: cmFile.getForOut(nameResult)) { //ставим в очередь изначальное множество возможных путей
-            if (cm.getFlags().isCanPerform()) {         //при условии что мы ранее не поняли, что получить её не можем
-                queueCMLine.add(cm);
-                newTree.add(cm);
-            }
-        }
-        while (queueCMLine.size() > 0) {
-            CMLine cmLine = queueCMLine.poll();     // достаём из очереди строку с которой будем работать
-            for (String str: cmLine.getIn()) {      // Добавляем в очередь все имена, необходимые для получения результата
-                if ( ! (new File(str).exists()) ) { // Если это файл, то не добавляем его в очередь (уже получен)
-                    if(!queueName.contains(str)) {  //если очередь уже не содержит элемент
-                        queueName.add(str);
-                    }
-                }
-            }
-            while (queueName.size() > 0){                   //проходим по всем входным файлам
-                String name = queueName.poll();             //выбираем из очереди элемент
-                for (CMLine cm: cmFile.getForOut(name)) {   //ищем все возможные пути его получения
-                    if (cm.getFlags().isCanPerform()) {     //если эту ветвь нельзя исполнить, то не запоминаем
-                        if(!queueCMLine.contains(cm)) {     //если очередь уже содержит элемент, то не добавляем её
-                            queueCMLine.add(cm);
-                            newTree.add(cm);
-                        }
-                    }
-                }
-            }
-
-        }
-        return new CMFile(newTree);
-    }
-    public CMFile getBranch(CMFile tree, String nameResult){
-        int countColor = 1;
-        boolean isTime = (  parameters.isTime() && !parameters.isMemory() )
-                      || ( !parameters.isTime() && !parameters.isMemory() );
-        ArrayList<CMLine> branch = new ArrayList<CMLine>();
-
-
-        //// TODO: 21.10.2016 "обнулять" все используемые флаги и метки
-        //// TODO: 21.10.2016 проверять флаг на возможность выполнения
-        
-        //первая итерация алгоритма
-        for(CMLine cmLine: tree.getLines()) {
-            if(cmLine.getFlags().isCanPerform()) {
-                boolean isFirstLayer = false; // первый слой - команды, во вход. файлах которых есть файл, не получаемый из CM
-                for (String fileIn : cmLine.getIn()) {
-                    if (tree.getOnlyInput().contains(fileIn)) {
-                        if (isTime) { // опт по времени
-                            cmLine.getProperties().setWeight(cmLine.getProperties().getWeightTime());
-                            //cmLine.getProperties().setColor(countColor);
-                            //++countColor;
-
-                        } else { // иначе по памяти
-                            cmLine.getProperties().setWeight(cmLine.getProperties().getWeightMemory());
-                            //cmLine.getProperties().setColor(countColor);
-                            //++countColor;
-                        }
-                        isFirstLayer = true;
-                        break;
-                    }
-                }
-                if (!isFirstLayer) {
-                    cmLine.getProperties().setWeight(cmLine.getProperties().INFINITEWEIGHT);
-                }
-                cmLine.getProperties().setColor(countColor);
-                ++countColor;
-            }
-        }
-        //
-        boolean change = true;
-        while(change) {
-            change = false;
-            //// TODO: 21.10.2016 реализовать нахождение min суммы из входных файлов
-            // пока реализовать только minimum покомпонентно
-            for (CMLine cmLine : tree.getLines()) {
-                if(cmLine.getFlags().isCanPerform()) {  // если можно выполнять
-                    if(!cmLine.getFlags().isFinish()) { // если раньше не запускали
-                        for (String nameIn : cmLine.getIn()) {
-                            if((new File(nameIn).exists())){ //если это файл есть, его получать не нужно
-                                continue;
-                            }
-                            if(!cmFile.getOnlyInput().contains(nameIn)) { // если это не первый слой(он уже выставлен)
-                                boolean isAllNotINFINITEWEIGHT = true;
-                                for (CMLine sources: cmFile.getForOut(nameIn)) {
-                                    if(sources.getFlags().isCanPerform()) {  // если можно выполнять
-                                        if (!sources.getFlags().isFinish()) { // если раньше не запускали
-                                            if (sources.getProperties().getWeight() == sources.getProperties().INFINITEWEIGHT) {
-                                                isAllNotINFINITEWEIGHT = false;
-                                            }
-                                        }
-                                    }
-                                }
-                                if(isAllNotINFINITEWEIGHT) {
-                                    int minWeight = Integer.MAX_VALUE;
-                                    CMLine minLine = null;
-                                    for (CMLine sources : cmFile.getForOut(nameIn)) {
-                                        if (sources.getProperties().getWeight() != sources.getProperties().INFINITEWEIGHT) {
-                                            if (minWeight > sources.getProperties().getWeight()) {
-                                                minWeight = sources.getProperties().getWeight();
-                                                minLine = sources;
-                                            }
-                                        }
-                                    }
-                                    minLine.getProperties().setColor(cmLine.getProperties().getColor());
-                                    cmLine.getProperties().setWeight(minLine.getProperties().getWeightTime());
-                                    if(isTime){
-                                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeight() + cmLine.getProperties().getWeightTime());
-                                    } else {
-                                        cmLine.getProperties().setWeight(cmLine.getProperties().getWeight() + cmLine.getProperties().getWeightMemory());
-                                    }
-                                    change = true;
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    private boolean performMinBranch(CMTree tree) throws IOException {
+        CMTreeVertex minVertexHead = null;
         int minWeight = Integer.MAX_VALUE;
-        CMLine min = null;
-        for(CMLine line: cmFile.getForOut(nameResult)){
-            if(line.getProperties().getWeight() < minWeight){
-                min = line;
-                minWeight = line.getProperties().getWeight();
+        for (CMTreeVertex head: tree.getHead()) {
+            if(head.getCmLine().getFlags().isCanPerform()){
+                if(head.getCmLine().getProperties().getWeight() < minWeight){
+                    minVertexHead = head;
+                    minWeight = head.getCmLine().getProperties().getWeight();
+                }
             }
         }
-        for(CMLine line: cmFile.getLines()){
-            if(min.getProperties().getColor() == line.getProperties().getColor()){
-                branch.add(line);
+        ArrayList<CMLine> branch = new ArrayList<>();
+        Queue<CMTreeVertex> queue = new LinkedList<CMTreeVertex>();
+        queue.add(minVertexHead);
+        CMTreeVertex vertex;
+        while((vertex = queue.poll()) != null){
+            branch.add(vertex.getCmLine());
+            for (String nameIn: vertex.getCmLine().getIn()) {
+                if(vertex.getMinIn(nameIn) != null) {
+                    queue.add(vertex.getMinIn(nameIn));
+                }
             }
         }
-        return new CMFile(branch);
+        return performCMFile(new CMFile(branch));
     }
-    private boolean performBranch(CMFile branch) throws IOException {
+
+    private boolean performCMLine(CMLine cmLine) throws IOException {
+        try {
+            logCollector.addLine("start " + cmLine.getCommand());
+            cmLine.getFlags().setStart(true);
+            Process pr = Runtime.getRuntime().exec(cmLine.getCommand());
+            while (pr.isAlive()) {
+                try {
+                    pr.waitFor();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+            boolean rez = ( pr.exitValue() == cmLine.getProperties().getCorrectReturnValue() );
+            if(!rez){
+                cmLine.getFlags().setCanPerform(false);
+                logCollector.addLine("incorrect return value " + cmLine.getCommand());
+            }
+            return rez;
+        } finally {
+            cmLine.getFlags().setFinish(true);
+            logCollector.addLine("finish " + cmLine.getCommand());
+        }
+    }
+    private boolean performCMFile(CMFile branch) throws IOException {
         boolean flag = true;
         lighthouse.error = false;
         int count = 0; //количесто выполненых операций
@@ -305,30 +237,7 @@ public class Parser {
 
         return true;
     }
-    private boolean performCMLine(CMLine cmLine) throws IOException {
-        try {
-            logCollector.addLine("start " + cmLine.getCommand());
-            cmLine.getFlags().setStart(true);
-            Process pr = Runtime.getRuntime().exec(cmLine.getCommand());
-            while (pr.isAlive()) {
-                try {
-                    pr.waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-            boolean rez = ( pr.exitValue() == cmLine.getProperties().getCorrectReturnValue() );
-            if(!rez){
-                cmLine.getFlags().setCanPerform(false);
-                logCollector.addLine("incorrect return value " + cmLine.getCommand());
-            }
-            return rez;
-        } finally {
-            cmLine.getFlags().setFinish(true);
-            logCollector.addLine("finish " + cmLine.getCommand());
-        }
-    }
+
     public static void main(String[] args) {
         try {
             Parser parser = new Parser(args);
@@ -337,6 +246,8 @@ public class Parser {
             System.err.println(e.toString());
             System.exit(-1);
         }
+        //HashMap<String, Integer> hashMap = new HashMap<>();
+
     }
 
     public class Parameters{
