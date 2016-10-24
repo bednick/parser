@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class Parser {
     private Parameters parameters;
-    private final Lighthouse lighthouse;
+    private volatile Lighthouse lighthouse;
     private CMFile cmFile;
     private LogCollector logCollector;
     private RubbishCollector rubbishCollector;
@@ -31,22 +31,26 @@ public class Parser {
         this.rubbishCollector = new RubbishCollector(this.logCollector);
         this.configFile = new ConfigFile("");
     }
-    public void start() throws IOException {
+    public boolean start() throws IOException {
         /*
         * Основная логика parser'а
         * */
-        if(parameters.namesFileOut.size() == 0){
-            return;
-        }
-        for(String str: parameters.getNamesFileCM()) {//считываем все входные CM
-            cmFile.readFile(str);
-        }
-        configFile.updateCMFile(cmFile);
         try {
+            logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString ());
+            if(parameters.namesFileOut.size() == 0){
+                return true;
+            }
+
+            for(String str: parameters.getNamesFileCM()) {//считываем все входные CM
+                cmFile.readFile(str);
+            }
+            configFile.updateCMFile(cmFile);
+
             for (String nameOut : parameters.getNamesFileOut()) {
                 CMTree tree = new CMTree(cmFile, nameOut);
-                System.out.println(tree.toString());
+                //System.out.println(tree.toString());
                 do{
+                    logCollector.push();
                     boolean isCanPerform = false;
                     for (CMTreeVertex ver: setMinWeight(tree).getHead()) {
                         if(ver.getCmLine().getFlags().isCanPerform()){
@@ -54,15 +58,21 @@ public class Parser {
                             break;
                         }
                     }
-                    System.out.println(tree.toString());
+                    logCollector.addLine("set tree");
+                    logCollector.addLine(tree.toString());
+                    //System.out.println(tree.toString());
                     if(!isCanPerform){
                         System.out.println("file '" + nameOut + "' can not get!");
-                        return;
+                        return false;
                     }
-                }while(performMinBranch(tree));
+                    //System.err.println("step");
+                    logCollector.push();
+                }while(!performMinBranch(tree));
             }
+            return true;
         } finally {
             rubbishCollector.clear(parameters.getNamesFileOut());
+            logCollector.addLine("\nFINISH PARSER " + new java.util.Date().toString ());
             logCollector.push();
         }
     }
@@ -158,8 +168,8 @@ public class Parser {
 
     private boolean performCMLine(CMLine cmLine) {
         try {
-            logCollector.addLine("start " + cmLine.getCommand());
             cmLine.getFlags().setStart(true);
+            logCollector.addLine("start " + cmLine.getCommand());
             Process pr = Runtime.getRuntime().exec(cmLine.getCommand());
             while (pr.isAlive()) {
                 try {
@@ -177,6 +187,8 @@ public class Parser {
             return rez;
         } catch (IOException e) {
             logCollector.addLine(e.toString());
+            //System.err.println(e.toString());
+            cmLine.getFlags().setCanPerform(false);
             return false;
         } finally {
             cmLine.getFlags().setFinish(true);
@@ -185,7 +197,7 @@ public class Parser {
     }
     private boolean performCMFile(CMFile branch) throws IOException {
         boolean flag = true;
-        lighthouse.error = false;
+        lighthouse.setError(false);
         int count = 0; //количесто выполненых операций
         while(flag){
             for (CMLine line : branch.getLines()) {
@@ -193,7 +205,8 @@ public class Parser {
                     continue;
                 }
                 boolean canPerform = true;
-                for (String nameIn : line.getIn()) {//Проверяем, можем ли выполнить команду
+                //Проверяем, можем ли выполнить команду
+                for (String nameIn : line.getIn()) {
                     if (!(new File(nameIn).exists())) {
                         canPerform = false;
                         break;
@@ -201,14 +214,17 @@ public class Parser {
                 }
                 if(canPerform) {
                     lighthouse.increment();
+                    line.getFlags().setStart(true);
                     CompletableFuture<Void> start = CompletableFuture.completedFuture(performCMLine(line))
                             .thenAcceptAsync((x)-> {
+
                                 if(!x) {
+                                    lighthouse.setError(true);
                                     synchronized (lighthouse) {
-                                        lighthouse.error = true;
                                         --lighthouse.count;
                                         lighthouse.notifyAll();
                                     }
+
                                 } else {
                                     lighthouse.decrement();
                                 }
@@ -216,7 +232,7 @@ public class Parser {
                             });
                     ++count;
                 }
-                if(count == branch.getSize()){
+                if(count == branch.getSize()){// TODO: 24.10.2016 Реализовать правильную проверку на завершения вычисления ветви 
                     flag = false;
                 }
             }
@@ -229,6 +245,7 @@ public class Parser {
                     }
                 }
                 if(lighthouse.error) {
+
                     while(lighthouse.count > 0) {
                         try {
                             lighthouse.wait();
@@ -237,6 +254,8 @@ public class Parser {
                         }
                     }
                     return false;
+                } else{
+                    //System.err.println(" not lighthouse.error");
                 }
             }
         }
@@ -247,10 +266,14 @@ public class Parser {
     public static void main(String[] args) {
         try {
             Parser parser = new Parser(args);
-            parser.start();
+            if(parser.start()){
+                System.exit(0);
+            } else {
+                System.exit(1);
+            }
         } catch (IOException e){
             System.err.println(e.toString());
-            System.exit(-1);
+            System.exit(1);
         }
         //HashMap<String, Integer> hashMap = new HashMap<>();
 
@@ -326,6 +349,9 @@ public class Parser {
         }
         public synchronized void decrement(){
             count--;
+        }
+        public synchronized void setError(boolean error) {
+            this.error = error;
         }
     }
 }

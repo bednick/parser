@@ -57,6 +57,8 @@ public class CMTree {
             stringBuilder.append(vertex);
             stringBuilder.append(" isCanPerform=");
             stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
+            stringBuilder.append(" isStart=");
+            stringBuilder.append(vertex.getCmLine().getFlags().isStart());
             stringBuilder.append("\n");
         }
 
@@ -68,6 +70,8 @@ public class CMTree {
                     stringBuilder.append(vertex);
                     stringBuilder.append(" isCanPerform=");
                     stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
+                    stringBuilder.append(" isStart=");
+                    stringBuilder.append(vertex.getCmLine().getFlags().isStart());
                     stringBuilder.append("\n");
                 }
             }
