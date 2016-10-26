@@ -223,18 +223,13 @@ public class Parser {
                     line.getFlags().setStart(true);
                     CompletableFuture<Void> start = CompletableFuture.completedFuture(performCMLine(line))
                             .thenAcceptAsync((x)-> {
-
                                 if(!x) {
                                     lighthouse.setError(true);
-                                    synchronized (lighthouse) {
-                                        --lighthouse.count;
-                                        lighthouse.notifyAll();
-                                    }
-
-                                } else {
-                                    lighthouse.decrement();
                                 }
-
+                                synchronized (lighthouse) {
+                                    --lighthouse.count;
+                                    lighthouse.notifyAll();
+                                }
                             });
                     ++count;
                 }
@@ -268,12 +263,6 @@ public class Parser {
                 } else{
                     //System.err.println(" not lighthouse.error");
                 }
-            }
-
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
 
