@@ -1,0 +1,27 @@
+##file_1 file_2;outFile;com 1
+##file_3;file_2;com 2
+##file_4;file_3 file_5;com 3
+##file_5;file_1;com 4
+##file_111;file_112;com 111
+##file_6;file_3;com 5
+##file_7;file_6;com 6
+##file_4;file_8;com 7
+
+file_1;outFile;com 1
+file_2;outFile;com 2
+file_3;file_13 file_1;com 3
+file_4;file_1;com 4
+file_5;file_1;com 5
+file_6;file_2 file_18;com 6
+file_7 file_24;file_2;com 7
+file_23;file_24;com 8
+file_9 file_10 file_19;file_3;com 9
+file_8;file_5;com 10
+file_14;file_4 file_8;com 11
+file_12 file_11;file_8;com 12
+file_11;file_8;com 13
+file_11;file_6 file_7;com 14
+file_16 file_17;file_7;com 15
+file_15;file_9 file_10 file_14 file_12;com 16
+file_21;file_14 file_12;com 17
+file_22;file_16;com 18

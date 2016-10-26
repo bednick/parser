@@ -43,6 +43,7 @@ public class Parser {
 
             for(String str: parameters.getNamesFileCM()) {//считываем все входные CM
                 cmFile.readFile(str);
+                logCollector.addLine("NAME CM '" + str + "'");
             }
             configFile.updateCMFile(cmFile);
 
@@ -156,14 +157,20 @@ public class Parser {
         queue.add(minVertexHead);
         CMTreeVertex vertex;
         while((vertex = queue.poll()) != null){
-            branch.add(vertex.getCmLine());
+            if(!branch.contains(vertex.getCmLine())) {
+                branch.add(vertex.getCmLine());
+            }
             for (String nameIn: vertex.getCmLine().getIn()) {
                 if(vertex.getMinIn(nameIn) != null) {
                     queue.add(vertex.getMinIn(nameIn));
                 }
             }
         }
-        return performCMFile(new CMFile(branch));
+
+        CMFile cmFile = new CMFile(branch);
+        logCollector.addLine("BRANCH:");
+        logCollector.addLine(cmFile.toString());
+        return performCMFile(cmFile);
     }
 
     private boolean performCMLine(CMLine cmLine) {
@@ -200,6 +207,7 @@ public class Parser {
         lighthouse.setError(false);
         int count = 0; //количесто выполненых операций
         while(flag){
+
             for (CMLine line : branch.getLines()) {
                 if(line.getFlags().isStart()){ // если строка уже была запушенна ранее, то и проверять её не нужно более
                     continue;
@@ -236,6 +244,10 @@ public class Parser {
                     flag = false;
                 }
             }
+            if(count == 0){
+                System.err.println("error brach");
+                return false;
+            }
             synchronized (lighthouse) {
                 if(lighthouse.count != 0) {
                     try {
@@ -257,6 +269,12 @@ public class Parser {
                 } else{
                     //System.err.println(" not lighthouse.error");
                 }
+            }
+
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 

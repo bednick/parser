@@ -37,6 +37,11 @@ public class LogCollector {
         if(working){
             log.add(string);
             log.add("\n");
+            try {
+                push();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
     public void push() throws IOException {

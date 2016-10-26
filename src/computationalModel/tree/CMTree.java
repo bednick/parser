@@ -55,7 +55,7 @@ public class CMTree {
         for (CMTreeVertex vertex: head) {
             queue.add(vertex);
             stringBuilder.append(vertex);
-            stringBuilder.append(" isCanPerform=");
+            stringBuilder.append("\t\tisCanPerform=");
             stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
             stringBuilder.append(" isStart=");
             stringBuilder.append(vertex.getCmLine().getFlags().isStart());
@@ -68,7 +68,7 @@ public class CMTree {
                 for (CMTreeVertex vertex: cmTreeVertex.getIn(nameIn)) {
                     queue.add(vertex);
                     stringBuilder.append(vertex);
-                    stringBuilder.append(" isCanPerform=");
+                    stringBuilder.append("\t\tisCanPerform=");
                     stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
                     stringBuilder.append(" isStart=");
                     stringBuilder.append(vertex.getCmLine().getFlags().isStart());
@@ -76,6 +76,8 @@ public class CMTree {
                 }
             }
         }
+        stringBuilder.append("*\t*\t*\t*");
+
         stringBuilder.append("*\t*\t*\t*");
         stringBuilder.append("\n");
         return stringBuilder.toString();

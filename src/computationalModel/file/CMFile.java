@@ -142,4 +142,13 @@ public class CMFile {
         }
         onlyInput = newOnlyInput;
     }
+    @Override
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
+        for (CMLine line: lines){
+            stringBuilder.append(line);
+            stringBuilder.append("\n");
+        }
+        return stringBuilder.toString();
+    }
 }

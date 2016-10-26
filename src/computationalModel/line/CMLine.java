@@ -24,23 +24,28 @@ public class CMLine implements Comparable<CMLine>{
     private Flags flags;
 
     public CMLine(String line){
-        this.in = ((line.split(DELIMITERROLE,3)[0]).split(DELIMITER));
-        this.out = ((line.split(DELIMITERROLE,3)[1]).split(DELIMITER));
-        this.command = line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[0];
-        if(line.split(DELIMITERROLE,3)[2].split(DELIMITERCOMMENT,2).length == 1) {
-            this.comments = new String[0];
-        } else{
-            this.comments = ((line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[1]).split(DELIMITER));
-        }
-        this.properties = new Properties();
-        this.flags = new Flags();
-        for (String com : comments) {
-            Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);
-            if (comment != null) {
-                comment.correct(this, com.split(Comment.DELIMITER, 2)[1]);
+        try {
+            this.in = ((line.split(DELIMITERROLE, 3)[0]).split(DELIMITER));
+            this.out = ((line.split(DELIMITERROLE, 3)[1]).split(DELIMITER));
+            this.command = line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[0];
+            if (line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2).length == 1) {
+                this.comments = new String[0];
             } else {
-                System.err.println("invalid format comment :" + com);
+                this.comments = ((line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[1]).split(DELIMITER));
             }
+            this.properties = new Properties();
+            this.flags = new Flags();
+            for (String com : comments) {
+                Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);
+                if (comment != null) {
+                    comment.correct(this, com.split(Comment.DELIMITER, 2)[1]);
+                } else {
+                    System.err.println("invalid format comment :" + com);
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException e){
+            System.err.println(line.toString());
+            throw e;
         }
     }
     public String[] getIn() {
