@@ -33,7 +33,7 @@ public class CMTree {
             for(String nameIn: cmTreeVertex.getCmLine().getIn()){
                 for (CMLine line: cmFile.getForOut(nameIn)){
                     if(!allVertex.containsKey(line)){
-                        allVertex.put(line, new CMTreeVertex(line));
+                        allVertex.put(line, new CMTreeVertex(line)); //доделать (протестить, что корректно работает)
                     }
                     cmTreeVertex.getIn(nameIn).add(allVertex.get(line));
                     queue.add(allVertex.get(line));

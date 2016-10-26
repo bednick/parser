@@ -32,7 +32,6 @@ public class CMTreeVertex {
         }
     }
     public CMTreeVertex getMinIn(String name){
-
         return minInVertex.get(name);
     }
     public CMLine getCmLine(){

@@ -46,14 +46,13 @@ public class Parser {
                 logCollector.addLine("NAME CM '" + str + "'");
             }
             configFile.updateCMFile(cmFile);
-
             for (String nameOut : parameters.getNamesFileOut()) {
                 CMTree tree = new CMTree(cmFile, nameOut);
-                //System.out.println(tree.toString());
+
                 do{
                     logCollector.push();
                     boolean isCanPerform = false;
-                    for (CMTreeVertex ver: setMinWeight(tree).getHead()) {
+                    for (CMTreeVertex ver: setMinWeight(tree).getHead()) { // Выставляем веса!
                         if(ver.getCmLine().getFlags().isCanPerform()){
                             isCanPerform = true;
                             break;
@@ -61,12 +60,10 @@ public class Parser {
                     }
                     logCollector.addLine("set tree");
                     logCollector.addLine(tree.toString());
-                    //System.out.println(tree.toString());
                     if(!isCanPerform){
                         System.out.println("file '" + nameOut + "' can not get!");
                         return false;
                     }
-                    //System.err.println("step");
                     logCollector.push();
                 }while(!performMinBranch(tree));
             }
@@ -96,10 +93,11 @@ public class Parser {
         while((vertex = queue.poll()) != null){ //заполняем стек
             for (String nameIn: vertex.getCmLine().getIn()) {
                 for (CMTreeVertex inVertex : vertex.getIn(nameIn)) {
-                    if(!stack.contains(inVertex)) {
-                        queue.add(inVertex);
-                        stack.add(inVertex);
+                    if(stack.contains(inVertex)) {
+                        stack.remove(inVertex);
                     }
+                    queue.add(inVertex);
+                    stack.add(inVertex);
                 }
             }
         }
@@ -246,6 +244,7 @@ public class Parser {
             }
             if(count == 0){
                 System.err.println("error brach");
+                logCollector.addLine("error brach");
                 return false;
             }
             synchronized (lighthouse) {
@@ -291,7 +290,7 @@ public class Parser {
             }
         } catch (IOException e){
             System.err.println(e.toString());
-            System.exit(1);
+            System.exit(2);
         }
         //HashMap<String, Integer> hashMap = new HashMap<>();
 

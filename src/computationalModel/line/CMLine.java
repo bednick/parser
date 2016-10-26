@@ -44,7 +44,7 @@ public class CMLine implements Comparable<CMLine>{
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e){
-            System.err.println(line.toString());
+            System.err.println(line);
             throw e;
         }
     }
@@ -99,6 +99,7 @@ public class CMLine implements Comparable<CMLine>{
         stringBuilder.append(command);
         return stringBuilder.toString();
     }
+
     public class Flags {
         /**
          * Класс, хранящий в себе все флаги класса CMLine,
