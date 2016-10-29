@@ -188,6 +188,8 @@ public class Parser {
             if(!rez){
                 cmLine.getFlags().setCanPerform(false);
                 logCollector.addLine("incorrect return value " + cmLine.getCommand());
+            } else {
+               rubbishCollector.addRubbish(cmLine);
             }
             return rez;
         } catch (IOException e) {

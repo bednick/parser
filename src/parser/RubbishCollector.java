@@ -49,6 +49,7 @@ public class RubbishCollector {
         /*
         * Удаление файлов, за исключение входных файлов парсера ( outParser )
         * */
+        log.addLine("start delete files");
         for(String str: rubbish){
             if(!outParser.contains(str)){
                 File file = new File(str);
@@ -61,6 +62,7 @@ public class RubbishCollector {
                 }
             }
         }
+        log.addLine("finish delete files");
         rubbish.clear();
     }
 
