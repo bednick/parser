@@ -13,6 +13,10 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Основной класс
  *
+ *
+ * Проблема
+ * Нужно ограничить количество fileMark'ов до 1 (метка только для корректного выполнения)
+ * Или как правильно реагировать на несколько файлов меток?! (именно про выполнение)
  */
 public class Parser {
     private Parameters parameters;
@@ -189,12 +193,27 @@ public class Parser {
                 cmLine.getFlags().setCanPerform(false);
                 logCollector.addLine("incorrect return value " + cmLine.getCommand());
             } else {
-               rubbishCollector.addRubbish(cmLine);
+                logCollector.addLine("correct return value " + cmLine.getCommand());
+                rubbishCollector.addRubbish(cmLine);
+            }
+            if(!cmLine.getProperties().isNullFilesMarks()){
+                for (Map.Entry entry: cmLine.getProperties().getFilesMarks().entrySet()){
+                    if (((Integer)entry.getKey()).intValue() ==  pr.exitValue()){
+                        File newFile = new File((String)entry.getValue());
+                        if(newFile.createNewFile()){
+                            logCollector.addLine("create fileMarks: " + entry.getValue());
+                            rubbishCollector.addRubbish((String)entry.getValue());
+                            break;
+                        } else {
+                            logCollector.addLine("error create fileMarks: " + entry.getValue());
+                            rez = false;
+                        }
+                    }
+                }
             }
             return rez;
         } catch (IOException e) {
             logCollector.addLine(e.toString());
-            //System.err.println(e.toString());
             cmLine.getFlags().setCanPerform(false);
             return false;
         } finally {

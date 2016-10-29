@@ -16,7 +16,8 @@ public class CMLine implements Comparable<CMLine>{
     public static final String DELIMITER = " ";
 
     private String[] in;
-    private String[] out;
+    //private String[] out;
+    private ArrayList<String> out;
     private String command;
     private String[] comments;
 
@@ -26,7 +27,10 @@ public class CMLine implements Comparable<CMLine>{
     public CMLine(String line){
         try {
             this.in = ((line.split(DELIMITERROLE, 3)[0]).split(DELIMITER));
-            this.out = ((line.split(DELIMITERROLE, 3)[1]).split(DELIMITER));
+            this.out = new ArrayList<String>();
+            for (String nameOut: (line.split(DELIMITERROLE, 3)[1]).split(DELIMITER)) {
+                out.add(nameOut);
+            }
             this.command = line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[0];
             if (line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2).length == 1) {
                 this.comments = new String[0];
@@ -51,7 +55,7 @@ public class CMLine implements Comparable<CMLine>{
     public String[] getIn() {
         return in;
     }
-    public String[] getOut() {
+    public ArrayList<String> getOut() {
         return out;
     }
     public String getCommand() {
@@ -74,8 +78,8 @@ public class CMLine implements Comparable<CMLine>{
         if(command.compareTo(o.command) == 0){
             if(in.length != o.in.length){
                 return in.length - o.in.length;
-            } else if(out.length != o.out.length){
-                return out.length - o.out.length;
+            } else if(out.size() != o.out.size()){
+                return out.size() - o.out.size();
             } else{
                 return 0;
             }
@@ -196,6 +200,13 @@ public class CMLine implements Comparable<CMLine>{
                 filesMarks = new HashMap<>();
             }
             return filesMarks;
+        }
+        public boolean isNullFilesMarks(){
+            if(filesMarks == null){
+                return true;
+            } else {
+                return false;
+            }
         }
         public ArrayList<String> getFileNotRubbish() {
             if(filesNotRubbish == null){

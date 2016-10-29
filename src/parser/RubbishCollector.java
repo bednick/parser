@@ -45,6 +45,9 @@ public class RubbishCollector {
             }
         }
     }
+    public void addRubbish(String nameFile) {
+        rubbish.add(nameFile);
+    }
     public void clear(ArrayList<String> outParser){
         /*
         * Удаление файлов, за исключение входных файлов парсера ( outParser )

@@ -14,6 +14,8 @@ public class DownloadComment {
         map.put("rubbish", new ComRubbish());
         map.put("notRubbish", new ComNotRubbish());
         map.put("createMark", new ComCreateMark());
+        map.put("time", new ComWeightTime());
+        map.put("memory", new ComWeightMemory());
     }
     public static Comment getComment(String comment) {
         String buf[] = comment.split(Comment.DELIMITER, 2);//распарсить комент
