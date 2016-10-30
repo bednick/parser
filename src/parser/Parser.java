@@ -232,7 +232,7 @@ public class Parser {
                         File newFile = new File((String)entry.getValue());
                         if(newFile.createNewFile()){
                             logCollector.addLine("create fileMarks: " + entry.getValue());
-                            rubbishCollector.addRubbish((String)entry.getValue());
+                            rubbishCollector.addRubbish((String)entry.getValue(), cmLine);
                             break;
                         } else {
                             logCollector.addLine("error create fileMarks: " + entry.getValue());

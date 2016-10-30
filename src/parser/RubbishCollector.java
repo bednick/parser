@@ -45,8 +45,12 @@ public class RubbishCollector {
             }
         }
     }
-    public void addRubbish(String nameFile) {
-        rubbish.add(nameFile);
+    public void addRubbish(String nameFile, CMLine cmLine) {
+        if(cmLine.getFlags().isRubbishOut()) {
+            if(!cmLine.getProperties().getFileNotRubbish().contains(nameFile)){
+                rubbish.add(nameFile);
+            }
+        }
     }
     public void clear(ArrayList<String> outParser){
         /*
