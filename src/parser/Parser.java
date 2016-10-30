@@ -151,6 +151,11 @@ public class Parser {
                     vertex.setMinInVertex(nameIn, minInCMTreeVertex);
                 }
                 if(vertex.getCmLine().getProperties().INFINITEWEIGHT != vertex.getCmLine().getProperties().getWeight()) {
+                    if (isTime) {
+                        minWeightVertex += vertex.getCmLine().getProperties().getWeightTime();
+                    } else {
+                        minWeightVertex += vertex.getCmLine().getProperties().getWeightMemory();
+                    }
                     logCollector.addLine("minWeightVertex == " + minWeightVertex);
                     vertex.getCmLine().getProperties().setWeight(minWeightVertex);
                 }
