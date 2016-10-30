@@ -1,6 +1,7 @@
 package computationalModel.file;
 
 import computationalModel.line.CMLine;
+import parser.LogCollector;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -11,12 +12,16 @@ import java.util.ArrayList;
 public class CMFile {
     private ArrayList<CMLine> lines;
     private ArrayList<String> onlyInput;
+    private LogCollector log;
 
-    public CMFile(){
-        lines = new ArrayList<>();
+    public CMFile(LogCollector log){
+        this.lines = new ArrayList<>();
+        this.log = log;
+
     }
-    public CMFile(ArrayList<CMLine> lines) {
+    public CMFile(ArrayList<CMLine> lines, LogCollector log) {
         this.lines = lines;
+        this.log = log;
         //this.setOnlyInput();
     }
 
@@ -37,7 +42,7 @@ public class CMFile {
             while((buf = reader.readLine()) != null) {
                 if(buf.length() > 2) {
                     if(buf.charAt(0) != '#') {
-                        lines.add(new CMLine(buf));
+                        lines.add(new CMLine(buf, log));
                     }
                 }
             }

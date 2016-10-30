@@ -2,6 +2,7 @@ package computationalModel.line;
 
 import computationalModel.line.comments.Comment;
 import computationalModel.line.comments.DownloadComment;
+import parser.LogCollector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +17,6 @@ public class CMLine implements Comparable<CMLine>{
     public static final String DELIMITER = " ";
 
     private String[] in;
-    //private String[] out;
     private ArrayList<String> out;
     private String command;
     private String[] comments;
@@ -24,7 +24,7 @@ public class CMLine implements Comparable<CMLine>{
     private Properties properties;
     private Flags flags;
 
-    public CMLine(String line){
+    public CMLine(String line, LogCollector log){
         try {
             this.in = ((line.split(DELIMITERROLE, 3)[0]).split(DELIMITER));
             this.out = new ArrayList<String>();
@@ -40,9 +40,9 @@ public class CMLine implements Comparable<CMLine>{
             this.properties = new Properties();
             this.flags = new Flags();
             for (String com : comments) {
-                Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);// result=0 -> result
+                Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);
                 if (comment != null) {
-                    comment.correct(this, com.split(Comment.DELIMITER, 2)[1]);
+                    comment.correct(this, com.split(Comment.DELIMITER, 2)[1], log);
                 } else {
                     System.err.println("invalid format comment :" + com);
                 }

@@ -1,6 +1,7 @@
 package computationalModel.line.comments;
 
 import computationalModel.line.CMLine;
+import parser.LogCollector;
 
 /**
  * абстрактный класс, реализующий коментарии вида:
@@ -13,9 +14,9 @@ public abstract class Comment {
     public Comment() {
         lastComment = null;
     }
-    public abstract void correct(CMLine cmLine);
-    public void correct(CMLine cmLine, String comment){
+    protected abstract void correct(CMLine cmLine, LogCollector log);
+    public void correct(CMLine cmLine, String comment, LogCollector log){
         lastComment = comment;
-        correct(cmLine);
+        correct(cmLine, log);
     }
 }

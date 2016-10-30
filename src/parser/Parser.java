@@ -30,7 +30,7 @@ public class Parser {
     public Parser(String[] args) {
         this.parameters = new Parameters(args);
         this.lighthouse = new Lighthouse();
-        this.cmFile  = new CMFile();
+        this.cmFile  = new CMFile(logCollector);
         this.logCollector = new LogCollector();
         this.rubbishCollector = new RubbishCollector(this.logCollector);
         this.configFile = new ConfigFile("");
@@ -41,19 +41,25 @@ public class Parser {
         * */
         try {
             logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString ());
-            if(parameters.namesFileOut.size() == 0){
+            if (parameters.namesFileOut.size() == 0){
                 return true;
             }
-
-            for(String str: parameters.getNamesFileCM()) {//считываем все входные CM
+            for (String str: parameters.getNamesFileCM()) {//считываем все входные CM
                 cmFile.readFile(str);
                 logCollector.addLine("NAME CM '" + str + "'");
             }
-            configFile.updateCMFile(cmFile);
+            if (parameters.isTime()) {
+                logCollector.addLine("Parametrs -t");
+            } else if (parameters.isMemory()) {
+                logCollector.addLine("Parametrs -m");
+            } else {
+                logCollector.addLine("Parametrs -t");
+            }
+            configFile.updateCMFile (cmFile, logCollector);
             for (String nameOut : parameters.getNamesFileOut()) {
                 CMTree tree = new CMTree(cmFile, nameOut);
 
-                do{
+                do {
                     logCollector.push();
                     boolean isCanPerform = false;
                     for (CMTreeVertex ver: setMinWeight(tree).getHead()) { // Выставляем веса!
@@ -84,8 +90,8 @@ public class Parser {
         * выставляет у каждой вершины её вес(зависит от параметров Parser'a)
         * если вершина является недоступной, помечает это
         * */
-        Queue<CMTreeVertex> queue = new LinkedList<CMTreeVertex>(); // Для правильного добавления в стек
-        Stack<CMTreeVertex> stack = new Stack<CMTreeVertex>();      // Последовательность всех вершин, так чтобы при доставании элемента
+        Queue<CMTreeVertex> queue = new LinkedList<>(); // Для правильного добавления в стек
+        Stack<CMTreeVertex> stack = new Stack<>();      // Последовательность всех вершин, так чтобы при доставании элемента
                                                                     // у всех входящих вершин были выставлены веса
         boolean isTime = ( parameters.isTime() && !parameters.isMemory())  //определяем, по какому критерию ищем min вес
                       || (!parameters.isTime() && !parameters.isMemory());
@@ -146,8 +152,10 @@ public class Parser {
     private boolean performMinBranch(CMTree tree) throws IOException {
         CMTreeVertex minVertexHead = null;
         int minWeight = Integer.MAX_VALUE;
+        logCollector.addLine("performMinBranch");
         for (CMTreeVertex head: tree.getHead()) {
             if(head.getCmLine().getFlags().isCanPerform()){
+                logCollector.addLine("weight " + head + " == " + head.getCmLine().getProperties().getWeight());
                 if(head.getCmLine().getProperties().getWeight() < minWeight){
                     minVertexHead = head;
                     minWeight = head.getCmLine().getProperties().getWeight();
@@ -155,7 +163,7 @@ public class Parser {
             }
         }
         ArrayList<CMLine> branch = new ArrayList<>();
-        Queue<CMTreeVertex> queue = new LinkedList<CMTreeVertex>();
+        Queue<CMTreeVertex> queue = new LinkedList<>();
         queue.add(minVertexHead);
         CMTreeVertex vertex;
         while((vertex = queue.poll()) != null){
@@ -169,7 +177,7 @@ public class Parser {
             }
         }
 
-        CMFile cmFile = new CMFile(branch);
+        CMFile cmFile = new CMFile(branch, logCollector);
         logCollector.addLine("BRANCH:");
         logCollector.addLine(cmFile.toString());
         return performCMFile(cmFile);

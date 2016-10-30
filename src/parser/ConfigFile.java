@@ -14,10 +14,10 @@ public class ConfigFile {
     public void setNameConfigFile(String nameConfigFile) {
         this.nameConfigFile = nameConfigFile;
     }
-    public void updateConfigFile(CMFile cmFile){
+    public void updateConfigFile(CMFile cmFile, LogCollector log){
 
     }
-    public void updateCMFile(CMFile cmFile){
+    public void updateCMFile(CMFile cmFile, LogCollector log){
 
     }
 }
