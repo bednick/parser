@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class DownloadComment {
     private static Map<String, Comment> map;
-    {
+    static {
         map = new HashMap<>();
         map.put("result", new ComResult());
         map.put("rubbish", new ComRubbish());

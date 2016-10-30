@@ -40,7 +40,7 @@ public class CMLine implements Comparable<CMLine>{
             this.properties = new Properties();
             this.flags = new Flags();
             for (String com : comments) {
-                Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);
+                Comment comment = DownloadComment.getComment(com.split(Comment.DELIMITER, 2)[0]);// result=0 -> result
                 if (comment != null) {
                     comment.correct(this, com.split(Comment.DELIMITER, 2)[1]);
                 } else {
