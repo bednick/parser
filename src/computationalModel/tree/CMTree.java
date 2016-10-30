@@ -46,6 +46,7 @@ public class CMTree {
     }
     @Override
     public String toString(){
+        ArrayList<CMTreeVertex> allVertex = new ArrayList<>();
         StringBuilder stringBuilder = new StringBuilder();
         Queue<CMTreeVertex> queue = new LinkedList<CMTreeVertex>();
 
@@ -54,6 +55,7 @@ public class CMTree {
         stringBuilder.append("\n");
         for (CMTreeVertex vertex: head) {
             queue.add(vertex);
+            allVertex.add(vertex);
             stringBuilder.append(vertex);
             stringBuilder.append("\t\tisCanPerform=");
             stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
@@ -66,13 +68,16 @@ public class CMTree {
             CMTreeVertex cmTreeVertex = queue.poll();
             for(String nameIn: cmTreeVertex.getCmLine().getIn()) {
                 for (CMTreeVertex vertex: cmTreeVertex.getIn(nameIn)) {
-                    queue.add(vertex);
-                    stringBuilder.append(vertex);
-                    stringBuilder.append("\t\tisCanPerform=");
-                    stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
-                    stringBuilder.append(" isStart=");
-                    stringBuilder.append(vertex.getCmLine().getFlags().isStart());
-                    stringBuilder.append("\n");
+                    if (!allVertex.contains(vertex)) {
+                        queue.add(vertex);
+                        allVertex.add(vertex);
+                        stringBuilder.append(vertex);
+                        stringBuilder.append("\t\tisCanPerform=");
+                        stringBuilder.append(vertex.getCmLine().getFlags().isCanPerform());
+                        stringBuilder.append(" isStart=");
+                        stringBuilder.append(vertex.getCmLine().getFlags().isStart());
+                        stringBuilder.append("\n");
+                    }
                 }
             }
         }
