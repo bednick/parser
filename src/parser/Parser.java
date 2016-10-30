@@ -30,9 +30,9 @@ public class Parser {
     public Parser(String[] args) {
         this.parameters = new Parameters(args);
         this.lighthouse = new Lighthouse();
-        this.cmFile  = new CMFile(logCollector);
         this.logCollector = new LogCollector();
-        this.rubbishCollector = new RubbishCollector(this.logCollector);
+        this.cmFile  = new CMFile(logCollector);
+        this.rubbishCollector = new RubbishCollector(logCollector);
         this.configFile = new ConfigFile("");
     }
     public boolean start() throws IOException {
@@ -95,6 +95,9 @@ public class Parser {
                                                                     // у всех входящих вершин были выставлены веса
         boolean isTime = ( parameters.isTime() && !parameters.isMemory())  //определяем, по какому критерию ищем min вес
                       || (!parameters.isTime() && !parameters.isMemory());
+        if (isTime) {
+            logCollector.addLine("isTime optimization");
+        }
         for(CMTreeVertex head: tree.getHead()){
             queue.add(head);
             stack.add(head);
@@ -116,6 +119,7 @@ public class Parser {
             if(vertex.getCmLine().getFlags().isCanPerform()) { // при условии, что эту строчку можно выполнить
                 int minWeightVertex = 0;
                 vertex.getCmLine().getProperties().setWeight(0);
+                logCollector.addLine("vertex : " + vertex.getCmLine().getCommand());
                 for (String nameIn : vertex.getCmLine().getIn()) {
                     int minWeightFile = Integer.MAX_VALUE;      //минимальный вес, во всех входящих строчках, для ОТДЕЛЬНОГО ВХОДНОГО ФАЙЛА
                     CMTreeVertex minInCMTreeVertex = null;
@@ -130,7 +134,7 @@ public class Parser {
                                         minInCMTreeVertex = inVertex;
                                     }
                                 } else {
-                                    if(inVertex.getCmLine().getProperties().getWeightTime() < minWeightFile){
+                                    if(inVertex.getCmLine().getProperties().getWeightMemory() < minWeightFile){
                                         minWeightFile = inVertex.getCmLine().getProperties().getWeightMemory();
                                         minInCMTreeVertex = inVertex;
                                     }
@@ -140,11 +144,15 @@ public class Parser {
                     }
                     if(minWeightFile == Integer.MAX_VALUE){
                         vertex.getCmLine().getFlags().setCanPerform(false);
+                        vertex.getCmLine().getProperties().setWeight(vertex.getCmLine().getProperties().INFINITEWEIGHT);
+                        break;
                     }
                     minWeightVertex += minWeightFile;
                     vertex.setMinInVertex(nameIn, minInCMTreeVertex);
                 }
-                vertex.getCmLine().getProperties().setWeight(minWeightVertex);
+                if(vertex.getCmLine().getProperties().INFINITEWEIGHT != vertex.getCmLine().getProperties().getWeight()) {
+                    vertex.getCmLine().getProperties().setWeight(minWeightVertex);
+                }
             }
         } // у всех вершин выставлен вес
         return tree;
