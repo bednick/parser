@@ -145,8 +145,10 @@ public class Parser {
                     if(minWeightFile == Integer.MAX_VALUE){
                         vertex.getCmLine().getFlags().setCanPerform(false);
                         vertex.getCmLine().getProperties().setWeight(vertex.getCmLine().getProperties().INFINITEWEIGHT);
+                        logCollector.addLine("file " + nameIn +"can not perform");
                         break;
                     }
+                    logCollector.addLine("file " + nameIn + " minWeight =" + minWeightFile);
                     minWeightVertex += minWeightFile;
                     vertex.setMinInVertex(nameIn, minInCMTreeVertex);
                 }
@@ -158,6 +160,8 @@ public class Parser {
                     }
                     logCollector.addLine("minWeightVertex == " + minWeightVertex);
                     vertex.getCmLine().getProperties().setWeight(minWeightVertex);
+                } else {
+                    logCollector.addLine("vertex "+ vertex.getCmLine().getCommand() +" can not perform");
                 }
             }
         } // у всех вершин выставлен вес
