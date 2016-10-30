@@ -128,7 +128,11 @@ public class Parser {
                     } else {
                         for (CMTreeVertex inVertex : vertex.getIn(nameIn)) {
                             if (inVertex.getCmLine().getFlags().isCanPerform()) {
-                                if(isTime){
+                                if(inVertex.getCmLine().getProperties().getWeight() < minWeightFile){
+                                    minWeightFile = inVertex.getCmLine().getProperties().getWeight();
+                                    minInCMTreeVertex = inVertex;
+                                }
+                                /*if(isTime){
                                     if(inVertex.getCmLine().getProperties().getWeightTime() < minWeightFile){
                                         minWeightFile = inVertex.getCmLine().getProperties().getWeightTime();
                                         minInCMTreeVertex = inVertex;
@@ -138,11 +142,11 @@ public class Parser {
                                         minWeightFile = inVertex.getCmLine().getProperties().getWeightMemory();
                                         minInCMTreeVertex = inVertex;
                                     }
-                                }
+                                }*/
                             }
                         }
                     }
-                    if(minWeightFile == Integer.MAX_VALUE){
+                    if (minWeightFile == Integer.MAX_VALUE) {
                         vertex.getCmLine().getFlags().setCanPerform(false);
                         vertex.getCmLine().getProperties().setWeight(vertex.getCmLine().getProperties().INFINITEWEIGHT);
                         logCollector.addLine("file " + nameIn +"can not perform");
@@ -152,7 +156,7 @@ public class Parser {
                     minWeightVertex += minWeightFile;
                     vertex.setMinInVertex(nameIn, minInCMTreeVertex);
                 }
-                if(vertex.getCmLine().getProperties().INFINITEWEIGHT != vertex.getCmLine().getProperties().getWeight()) {
+                if (vertex.getCmLine().getProperties().INFINITEWEIGHT != vertex.getCmLine().getProperties().getWeight()) {
                     if (isTime) {
                         minWeightVertex += vertex.getCmLine().getProperties().getWeightTime();
                     } else {
