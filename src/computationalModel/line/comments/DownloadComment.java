@@ -18,12 +18,10 @@ public class DownloadComment {
         map.put("memory", new ComWeightMemory());
     }
     public static Comment getComment(String comment) {
-        String buf[] = comment.split(Comment.DELIMITER, 2);//распарсить комент
-        if(map.containsKey(buf[0])){
-            map.get(buf[0]).setLastComment(buf[1]);
-            return map.get(buf[0]);
+        if(map.containsKey(comment)){
+            return map.get(comment);
         } else {
-            System.err.println("Comment "+ buf[0] +" не распознан");
+            System.err.println("Comment "+ comment +" не распознан");
         }
         return null;
     }

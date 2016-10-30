@@ -173,8 +173,8 @@ public class CMLine implements Comparable<CMLine>{
         public Properties(){
             this.weight = (MAXWEIGHT - MINWEIGHT) / 2;
             this.color = DEFAULTCOLOR;
-            this.weightTime = (MAXWEIGHT - MINWEIGHT) / 2;
-            this.weightMemory = (MAXWEIGHT - MINWEIGHT) / 2;
+            this.weightTime = (MAXWEIGHT - MINWEIGHT) / 4;
+            this.weightMemory = (MAXWEIGHT - MINWEIGHT) / 4;
             this.correctReturnValue = 0;
             this.filesMarks = null;
             this.filesNotRubbish = null;

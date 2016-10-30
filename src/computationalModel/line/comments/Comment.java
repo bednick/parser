@@ -13,9 +13,6 @@ public abstract class Comment {
     public Comment() {
         lastComment = null;
     }
-    public void setLastComment(String lastComment) {
-        this.lastComment = lastComment;
-    }
     public abstract void correct(CMLine cmLine);
     public void correct(CMLine cmLine, String comment){
         lastComment = comment;
