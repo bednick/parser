@@ -5,4 +5,6 @@
 !/.gitignore
 
 !/README.md
+
 !/cm.cm
+!/build.xml
