@@ -1,27 +1,21 @@
-## Пример вычислительной модели
+﻿## Пример вычислительной модели
 ##
 ##
 ## Строки начинающиеся с символа # считаются комментариями
 ##
 ##
-;;
+## Формат задания строки:
+## <входные файлы>;<выходные файлы>;<команда(ы)>#<комментарий(ии)>
+## символ “;” является обязательным как разделитель между входными и выходными файлами
+## Команда может содержать символ “;”
+## 	Например: touch outFile_1;touch outFile_1
+## Комментарий не является обязательным
+## Входные файлы разделяются между собой пробелами 
+## Выходные файлы разделяются между собой пробелами 
+## Комментарии разделяются между собой пробелами 
+##
+##
+## Пример строки из 2х входных файлов получаем 2 выходных
+inFile _1 inFile_2;outFile_1 outFile_2;touch outFile_1 ; touch outFile_2
 
-file_1;outFile;touch outFile
-file_2;outFile;touch outFile
-file_3;file_13 file_1;touch file_13;touch file_1
-file_4;file_1;touch file_1
-file_5;file_1;touch file_1
-file_6;file_2 file_18;touch file_2;touch file_18
-file_7 file_24;file_2;touch file_2
-file_23;file_24;touch file_24
-file_9 file_10 file_19;file_3;touch file_3
-file_8;file_5;touch file_5
-file_14;file_4 file_8;touch file_4;touch file_8
-file_12 file_11;file_8;touch file_8
-file_11;file_8;touch file_8
-file_11;file_6 file_7;touch file_6;touch file_7
-file_16 file_17;file_7;touch file_7
-file_15;file_9 file_10 file_14 file_12;touch file_9;touch file_10;touch file_14;touch file_12
-file_21;file_14 file_12;touch file_14;touch file_12
-file_22;file_16;touch file_16
-file_20;file_6;touch file_6
+
