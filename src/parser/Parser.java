@@ -5,8 +5,10 @@ import computationalModel.line.CMLine;
 import computationalModel.tree.CMTree;
 import computationalModel.tree.CMTreeVertex;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,8 +29,8 @@ public class Parser {
     private ConfigFile configFile;
 
 
-    public Parser(String[] args) {
-        this.parameters = new Parameters(args);
+    public Parser() {
+        this.parameters = new Parameters();
         this.lighthouse = new Lighthouse();
         this.logCollector = new LogCollector();
         this.cmFile  = new CMFile(logCollector);
@@ -42,7 +44,7 @@ public class Parser {
         try {
             logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString ());
             if (parameters.namesFileOut.size() == 0){
-                return true;
+                return false;
             }
             for (String str: parameters.getNamesFileCM()) {//считываем все входные CM
                 cmFile.readFile(str);
@@ -322,18 +324,81 @@ public class Parser {
 
     public static void main(String[] args) {
         try {
-            Parser parser = new Parser(args);
+            Parser parser = new Parser();
+            parser.parameters.addParameters(args);
+            if (args.length == 0) {
+                if (! view(parser)) {
+                    System.exit(1);
+                }
+            }
             if(parser.start()){
                 System.exit(0);
             } else {
                 System.exit(1);
             }
         } catch (IOException e){
-            System.err.println(e.toString());
+            System.out.println("<Parser>" + e.toString());
             System.exit(2);
         }
         //HashMap<String, Integer> hashMap = new HashMap<>();
 
+    }
+
+    public static boolean view(Parser parser) throws IOException {
+        while (true) {
+            System.out.println("<Parser>: введите парамметры, для работы. Для запуска системы введите -s");
+            BufferedReader streamIn = new BufferedReader(new InputStreamReader(System.in));
+            System.out.print("<Pasres>: ");
+            String[] inpar = streamIn.readLine().split(" ");
+            boolean flg_o = false;
+            boolean flg_s = false;
+            for (String str : inpar) {
+                switch (str) {
+                    case "-h":
+                    case "-H":
+                    case "--h":
+                    case "help":
+                        parser.parameters.printHelp();
+                        break;
+                    case "-o":
+                        flg_o = true;
+                        break;
+                    case "-t":
+                        parser.parameters.time = true;
+                        break;
+                    case "-m":
+                        parser.parameters.memory = true;
+                        break;
+                    case "-s":
+                        flg_s = true;
+                        break;
+                    case "--exit":
+                    case "-exit" :
+                    case "-e"    :
+                        System.exit(1);
+                    default:
+                        if (flg_o) {
+                            parser.parameters.addFileOut(str);
+                            flg_o = false;
+                        } else {
+                            parser.parameters.addFileCM(str);
+                        }
+                        break;
+                }
+                if (flg_s) {
+                    break;
+                }
+            }
+            flg_o = false;
+            if (flg_s) {
+                if (parser.parameters.getNamesFileCM().size() == 0 || parser.parameters.getNamesFileOut().size() == 0) {
+                    System.out.println("<Parser>: Не указан fileOut или fileCM. Работа не возможна.");
+                    return false;
+                }
+                break;
+            }
+        }
+        return  true;
     }
 
     public class Parameters{
@@ -345,17 +410,19 @@ public class Parser {
         private ArrayList<String> namesFileCM;
         private ArrayList<String> namesFileOut;
 
-        public Parameters(String[] args){
-            boolean flg_o = false;
+        public Parameters(){
             namesFileCM = new ArrayList<>();
             namesFileOut = new ArrayList<>();
+        }
+        public void addParameters(String[] args) throws IOException {
+            boolean flg_o = false;
             for (String str: args) {
                 switch (str){
                     case "-h":
                     case "-H":
                     case "--h":
                     case "help":
-                        System.out.println("HELP");
+                        printHelp();
                         break;
                     case "-o":
                         flg_o = true;
@@ -368,14 +435,20 @@ public class Parser {
                         break;
                     default:
                         if(flg_o){
-                            namesFileOut.add(str);
+                            addFileOut(str);
                             flg_o = false;
                         } else {
-                            namesFileCM.add(str);
+                            addFileCM(str);
                         }
                         break;
                 }
             }
+        }
+        public void addFileCM(String nameFile) {
+            namesFileCM.add(nameFile);
+        }
+        public void addFileOut(String nameFile) {
+            namesFileOut.add(nameFile);
         }
         public boolean isTime() {
             return time;
@@ -388,6 +461,14 @@ public class Parser {
         }
         public ArrayList<String> getNamesFileOut() {
             return namesFileOut;
+        }
+        public void printHelp () {
+            System.out.println("<Parser>: Для работы pasrer'а доступны следующие входные параметры:");
+            System.out.println("<Parser>: -t  ...");
+            System.out.println("<Parser>: -m  ...");
+            System.out.println("<Parser>: -s  - запуск системы");
+            System.out.println("<Parser>: <nameFileCM> ...");
+            System.out.println("<Parser>: -o <nameFileOut> ...");
         }
     }
     public class Lighthouse{
