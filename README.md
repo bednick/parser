@@ -7,7 +7,7 @@
 
 ## Install
 1. Clone this repo with: `git clone https://github.com/nikkollaii/parser.git`
-2. Install: `ant ant only-jar`
+2. Install: `ant only-jar`
 
 ## Using
 1. `java -jar Parser.jar`
