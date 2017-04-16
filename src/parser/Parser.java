@@ -51,11 +51,11 @@ public class Parser {
                 logCollector.addLine("NAME CM '" + str + "'");
             }
             if (parameters.isTime()) {
-                logCollector.addLine("Parametrs -t");
+                logCollector.addLine("Parameter -t");
             } else if (parameters.isMemory()) {
-                logCollector.addLine("Parametrs -m");
+                logCollector.addLine("Parameter -m");
             } else {
-                logCollector.addLine("Parametrs -t");
+                logCollector.addLine("Parameter -t");
             }
             configFile.updateCMFile (cmFile, logCollector);
             for (String nameOut : parameters.getNamesFileOut()) {
@@ -345,10 +345,10 @@ public class Parser {
     }
 
     public static boolean view(Parser parser) throws IOException {
+        System.out.println("<Parser>: введите парамметры, для работы. Для запуска системы введите -s, для справки -h, для выхода -e");
         while (true) {
-            System.out.println("<Parser>: введите парамметры, для работы. Для запуска системы введите -s");
             BufferedReader streamIn = new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("<Pasres>: ");
+            System.out.print("<Parser>: ");
             String[] inpar = streamIn.readLine().split(" ");
             boolean flg_o = false;
             boolean flg_s = false;
@@ -357,7 +357,8 @@ public class Parser {
                     case "-h":
                     case "-H":
                     case "--h":
-                    case "help":
+                    case "-help":
+                    case "--help":
                         parser.parameters.printHelp();
                         break;
                     case "-o":
@@ -463,12 +464,12 @@ public class Parser {
             return namesFileOut;
         }
         public void printHelp () {
-            System.out.println("<Parser>: Для работы pasrer'а доступны следующие входные параметры:");
-            System.out.println("<Parser>: -t  ...");
-            System.out.println("<Parser>: -m  ...");
-            System.out.println("<Parser>: -s  - запуск системы");
-            System.out.println("<Parser>: <nameFileCM> ...");
-            System.out.println("<Parser>: -o <nameFileOut> ...");
+            System.out.println("<Parser>: Для работы parser'а доступны следующие входные параметры:");
+            System.out.println("<Parser>: -t  — Найти оптимальный путь по минимальному времени");
+            System.out.println("<Parser>: -m  — Найти оптимальный путь по минимальному расходу памяти");
+            System.out.println("<Parser>: -s  — запуск системы");
+            System.out.println("<Parser>: <nameFileCM>     — установить файл вычислительной модели");
+            System.out.println("<Parser>: -o <nameFileOut> — установить выходной файл работы системы");
         }
     }
     public class Lighthouse{
