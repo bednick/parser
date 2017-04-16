@@ -9,9 +9,15 @@
 1. Clone this repo with: `git clone https://github.com/nikkollaii/parser.git`
 2. Install: `ant only-jar`
 
-## Run an example: method 1
+## Run an example: method 1.1
 1. `java -jar Parser.jar`
 2. `<Parser>: cm.cm -o out.txt -s`
+
+## Run an example: method 1.2
+1. `java -jar Parser.jar`
+2. `<Parser>: -o out.txt`
+3. `<Parser>: cm.cm`
+4. `<Parser>: -s`
 
 ## Run an example: method 2
 1. `java -jar Parser.jar cm.cm -o out.txt`
