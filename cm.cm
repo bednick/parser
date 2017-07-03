@@ -24,3 +24,10 @@ inFile_1 inFile_2;outFile_1 outFile_2;touch outFile_1 ; touch outFile_2
 ;file_2;touch file_2
 
 file_1 file_2;out.txt;"Hello world" >> out.txt
+
+## Далее приведётся пример работы системы Win
+
+;file_1;cmd /c echo .>file_1
+;file_2;cmd /c echo .>file_2
+
+file_1 file_2;out.txt;cmd /c echo "Hello world" >> out.txt
