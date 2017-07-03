@@ -221,6 +221,15 @@ public class Parser {
                         }
                         logCollector.addLine("");
                     }
+                    in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                    inputLine = in.readLine();
+                    if (inputLine != null) {
+                        logCollector.addLine("Input stream ");
+                        while ((inputLine = in.readLine()) != null) {
+                            logCollector.addLine(inputLine);
+                        }
+                        logCollector.addLine("");
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     return false;
