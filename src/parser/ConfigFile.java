@@ -3,7 +3,7 @@ package parser;
 import computationalModel.file.CMFile;
 
 /**
- * Класс отвечает за конфиг файл, в котором хранится информация о предыдущих запусках pasrer'а
+ * Класс отвечает за конфиг файл, в котором хранится информация о предыдущих запусках parser'а
  */
 public class ConfigFile {
     private String nameConfigFile;

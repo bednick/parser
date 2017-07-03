@@ -9,12 +9,13 @@ import java.util.ArrayList;
  * если в кострукторе не переданно имя, то пишется в <logParser.log>
  */
 public class LogCollector {
+    private final static String DEFAULT_NAME = "logParser.log";
     private ArrayList<String> log;
     private String nameLog;                     //имя файла лога
     private boolean working;                    //собирать ли лог
 
     public LogCollector() {
-        this.nameLog = "logParser.log";
+        this.nameLog = DEFAULT_NAME;
         this.working = true;
         this.log = new ArrayList<>();
     }

@@ -349,10 +349,10 @@ public class Parser {
         while (true) {
             BufferedReader streamIn = new BufferedReader(new InputStreamReader(System.in));
             System.out.print("<Parser>: ");
-            String[] inpar = streamIn.readLine().split(" ");
+            String[] inPar = streamIn.readLine().split(" ");
             boolean flg_o = false;
             boolean flg_s = false;
-            for (String str : inpar) {
+            for (String str : inPar) {
                 switch (str) {
                     case "-h":
                     case "-H":
@@ -376,7 +376,7 @@ public class Parser {
                     case "--exit":
                     case "-exit" :
                     case "-e"    :
-                        System.exit(1);
+                        System.exit(0);
                     default:
                         if (flg_o) {
                             parser.parameters.addFileOut(str);

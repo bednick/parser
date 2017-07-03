@@ -12,8 +12,8 @@ import java.util.Map;
  * Класс реализующий строку в вычислительной модели
  */
 public class CMLine implements Comparable<CMLine>{
-    public static final String DELIMITERCOMMENT = "#" ;
-    public static final String DELIMITERROLE = ";" ;
+    public static final String DELIMITER_COMMENT = "#" ;
+    public static final String DELIMITER_ROLE = ";" ;
     public static final String DELIMITER = " ";
 
     private String[] in;
@@ -26,16 +26,16 @@ public class CMLine implements Comparable<CMLine>{
 
     public CMLine(String line, LogCollector log){
         try {
-            this.in = ((line.split(DELIMITERROLE, 3)[0]).split(DELIMITER));
+            this.in = ((line.split(DELIMITER_ROLE, 3)[0]).split(DELIMITER));
             this.out = new ArrayList<String>();
-            for (String nameOut: (line.split(DELIMITERROLE, 3)[1]).split(DELIMITER)) {
+            for (String nameOut: (line.split(DELIMITER_ROLE, 3)[1]).split(DELIMITER)) {
                 out.add(nameOut);
             }
-            this.command = line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[0];
-            if (line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2).length == 1) {
+            this.command = line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2)[0];
+            if (line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2).length == 1) {
                 this.comments = new String[0];
             } else {
-                this.comments = ((line.split(DELIMITERROLE, 3)[2].split(DELIMITERCOMMENT, 2)[1]).split(DELIMITER));
+                this.comments = ((line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2)[1]).split(DELIMITER));
             }
             this.properties = new Properties();
             this.flags = new Flags();
@@ -159,11 +159,11 @@ public class CMLine implements Comparable<CMLine>{
         * */
         public final byte MAXWEIGHT = 100;
         public final byte MINWEIGHT = 0;
-        public final int DEFAULTCOLOR = -1;
+        //public final int DEFAULTCOLOR = -1;
         public final int INFINITEWEIGHT = Integer.MAX_VALUE;
 
         private int weight;        //вес, используемый при работе( при вычислении оптимального пути)
-        private int color;         //используется при выборе оптимального пути ()
+        //private int color;         //используется при выборе оптимального пути () или нет
         private byte weightTime;    //вес, отвечающий за скорость работы
         private byte weightMemory;  //вес, отвечающий за память, занимающую процессом
         private int correctReturnValue; // Какое возвращаемое значение считать корректным
@@ -172,7 +172,7 @@ public class CMLine implements Comparable<CMLine>{
 
         public Properties(){
             this.weight = (MAXWEIGHT - MINWEIGHT) / 2;
-            this.color = DEFAULTCOLOR;
+            //this.color = DEFAULTCOLOR;
             this.weightTime = (MAXWEIGHT - MINWEIGHT) / 4;
             this.weightMemory = (MAXWEIGHT - MINWEIGHT) / 4;
             this.correctReturnValue = 0;
@@ -183,9 +183,9 @@ public class CMLine implements Comparable<CMLine>{
         public int getWeight() {
             return weight;
         }
-        public int getColor() {
-            return color;
-        }
+        //public int getColor() {
+        //    return color;
+        //}
         public byte getWeightMemory() {
             return weightMemory;
         }
@@ -220,9 +220,9 @@ public class CMLine implements Comparable<CMLine>{
         public void setWeight(int weight) {
             this.weight = weight;
         }
-        public void setColor(int color) {
-            this.color = color;
-        }
+        //public void setColor(int color) {
+        //    this.color = color;
+        //}
         public void setWeightMemory(byte weightMemory) {
             if(weightMemory > MAXWEIGHT) {
                 this.weightMemory = MAXWEIGHT;

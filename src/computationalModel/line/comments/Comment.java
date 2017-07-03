@@ -11,6 +11,7 @@ import parser.LogCollector;
 public abstract class Comment {
     public static String DELIMITER = "=";
     protected String lastComment;
+
     public Comment() {
         lastComment = null;
     }
