@@ -5,8 +5,10 @@ import computationalModel.line.comments.DownloadComment;
 import parser.LogCollector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Класс реализующий строку в вычислительной модели
@@ -26,7 +28,8 @@ public class CMLine implements Comparable<CMLine>{
 
     public CMLine(String line, LogCollector log){
         try {
-            this.in = ((line.split(DELIMITER_ROLE, 3)[0]).split(DELIMITER));
+            this.in = (String[]) Arrays.stream(((line.split(DELIMITER_ROLE, 3)[0])
+                    .split(DELIMITER))).filter(l-> !l.equals("")).toArray(String[]::new);
             this.out = new ArrayList<String>();
             for (String nameOut: (line.split(DELIMITER_ROLE, 3)[1]).split(DELIMITER)) {
                 out.add(nameOut);
