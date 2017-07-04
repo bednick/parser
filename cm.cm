@@ -27,7 +27,7 @@ file_1 file_2;out.txt;echo "Hello world" >> out.txt
 
 ## Далее приведётся пример работы системы Win
 
-;file_1;cmd /c echo .>file_1
-;file_2;cmd /c echo .>file_2
+;file_1;echo .>file_1
+;file_2;echo .>file_2
 
-file_1 file_2;out.txt;cmd /c echo "Hello world" >> out.txt
+file_1 file_2;out.txt;echo Hello world >> out.txt

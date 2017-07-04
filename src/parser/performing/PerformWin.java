@@ -10,6 +10,7 @@ import java.io.IOException;
 public class PerformWin extends Perform {
     @Override
     Process start(CMLine line) throws IOException {
-        return Runtime.getRuntime().exec(line.getCommand());
+        ProcessBuilder processBuilder = new ProcessBuilder("cmd", "/c", line.getCommand());
+        return processBuilder.start();
     }
 }
