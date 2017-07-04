@@ -309,8 +309,8 @@ public class Parser {
                 }
             }
             if (count == 0) {
-                System.err.println("error brach");
-                logCollector.addLine("error brach");
+                System.err.println("error branch");
+                logCollector.addLine("error branch");
                 return false;
             }
             synchronized (lighthouse) {
@@ -494,6 +494,7 @@ public class Parser {
             System.out.println("<Parser>: -s  — запуск системы");
             System.out.println("<Parser>: <nameFileCM>     — установить файл вычислительной модели");
             System.out.println("<Parser>: -o <nameFileOut> — установить выходной файл работы системы");
+            System.out.println("<Parser>: -o ");
         }
     }
 
