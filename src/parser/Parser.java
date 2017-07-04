@@ -50,6 +50,7 @@ public class Parser {
         * */
         try {
             logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString());
+            logCollector.addLine("os=" + System.getProperty("os.name" ));
             if (parameters.namesFileOut.size() == 0) {
                 return false;
             }
