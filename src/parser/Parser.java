@@ -210,6 +210,8 @@ public class Parser {
         try {
             cmLine.getFlags().setStart(true);
             logCollector.addLine("start " + cmLine.getCommand());
+            /**/
+            //todo Заменить на вызов модуля
             Process pr = Runtime.getRuntime().exec(cmLine.getCommand());
             while (pr.isAlive()) {
                 try {
@@ -237,6 +239,7 @@ public class Parser {
                     return false;
                 }
             }
+            /**/
             boolean rez = (pr.exitValue() == cmLine.getProperties().getCorrectReturnValue());
             if (!rez) {
                 cmLine.getFlags().setCanPerform(false);
@@ -494,7 +497,6 @@ public class Parser {
             System.out.println("<Parser>: -s  — запуск системы");
             System.out.println("<Parser>: <nameFileCM>     — установить файл вычислительной модели");
             System.out.println("<Parser>: -o <nameFileOut> — установить выходной файл работы системы");
-            System.out.println("<Parser>: -o ");
         }
     }
 
