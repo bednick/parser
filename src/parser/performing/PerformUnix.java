@@ -11,11 +11,8 @@ public class PerformUnix extends Perform {
 
     @Override
     Process start(CMLine line) throws IOException {
-        Process processUnix;
         ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", line.getCommand());
-        processUnix = processBuilder.start();
-
-        return processUnix;
+        return processBuilder.start();
     }
 
     public static void main(String[] args) throws IOException {
