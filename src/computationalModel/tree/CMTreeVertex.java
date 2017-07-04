@@ -17,28 +17,33 @@ public class CMTreeVertex {
         this.inVertex = new HashMap<>();
         this.minInVertex = new HashMap<String, CMTreeVertex>();
         this.cmLine = cmLine;
-        for(String nameIn: cmLine.getIn()) {
+        for (String nameIn : cmLine.getIn()) {
             inVertex.put(nameIn, new ArrayList<>());
         }
     }
-    public ArrayList<CMTreeVertex> getIn(String name){
+
+    public ArrayList<CMTreeVertex> getIn(String name) {
         return inVertex.get(name);
     }
-    public void setMinInVertex(String nameIn, CMTreeVertex cmTreeVertex){
-        if(inVertex.containsKey(nameIn)) {
+
+    public void setMinInVertex(String nameIn, CMTreeVertex cmTreeVertex) {
+        if (inVertex.containsKey(nameIn)) {
             minInVertex.put(nameIn, cmTreeVertex);
         } else {
             System.err.println(nameIn + " in not included file");
         }
     }
-    public CMTreeVertex getMinIn(String name){
+
+    public CMTreeVertex getMinIn(String name) {
         return minInVertex.get(name);
     }
-    public CMLine getCmLine(){
+
+    public CMLine getCmLine() {
         return cmLine;
     }
+
     @Override
-    public String toString(){
+    public String toString() {
         return cmLine.toString();
     }
 }

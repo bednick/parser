@@ -11,8 +11,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Основной класс
- *
- *
+ * <p>
+ * <p>
  * Проблема
  * Нужно ограничить количество fileMark'ов до 1 (метка только для корректного выполнения)
  * Или как правильно реагировать на несколько файлов меток?! (именно про выполнение)
@@ -30,20 +30,21 @@ public class Parser {
         this.parameters = new Parameters();
         this.lighthouse = new Lighthouse();
         this.logCollector = new LogCollector();
-        this.cmFile  = new CMFile(logCollector);
+        this.cmFile = new CMFile(logCollector);
         this.rubbishCollector = new RubbishCollector(logCollector);
         this.configFile = new ConfigFile("");
     }
+
     private boolean start() throws IOException {
         /*
         * Основная логика parser'а
         * */
         try {
-            logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString ());
-            if (parameters.namesFileOut.size() == 0){
+            logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString());
+            if (parameters.namesFileOut.size() == 0) {
                 return false;
             }
-            for (String str: parameters.getNamesFileCM()) {//считываем все входные CM
+            for (String str : parameters.getNamesFileCM()) {//считываем все входные CM
                 cmFile.readFile(str);
                 logCollector.addLine("NAME CM '" + str + "'");
             }
@@ -54,58 +55,58 @@ public class Parser {
             } else {
                 logCollector.addLine("Parameter -t");
             }
-            configFile.updateCMFile (cmFile, logCollector);
+            configFile.updateCMFile(cmFile, logCollector);
             for (String nameOut : parameters.getNamesFileOut()) {
                 CMTree tree = new CMTree(cmFile, nameOut);
 
                 do {
                     logCollector.push();
                     boolean isCanPerform = false;
-                    for (CMTreeVertex ver: setMinWeight(tree).getHead()) { // Выставляем веса!
-                        if(ver.getCmLine().getFlags().isCanPerform()){
+                    for (CMTreeVertex ver : setMinWeight(tree).getHead()) { // Выставляем веса!
+                        if (ver.getCmLine().getFlags().isCanPerform()) {
                             isCanPerform = true;
                             break;
                         }
                     }
                     logCollector.addLine("set tree");
                     logCollector.addLine(tree.toString());
-                    if(!isCanPerform){
+                    if (!isCanPerform) {
                         System.out.println("file '" + nameOut + "' can not get!");
                         return false;
                     }
                     logCollector.push();
-                }while(!performMinBranch(tree));
+                } while (!performMinBranch(tree));
             }
             return true;
         } finally {
             rubbishCollector.clear(parameters.getNamesFileOut());
-            logCollector.addLine("\nFINISH PARSER " + new java.util.Date().toString ());
+            logCollector.addLine("\nFINISH PARSER " + new java.util.Date().toString());
             logCollector.push();
         }
     }
 
-    private CMTree setMinWeight(CMTree tree){
+    private CMTree setMinWeight(CMTree tree) {
         /*
         * выставляет у каждой вершины её вес(зависит от параметров Parser'a)
         * если вершина является недоступной, помечает это
         * */
         Queue<CMTreeVertex> queue = new LinkedList<>(); // Для правильного добавления в стек
         Stack<CMTreeVertex> stack = new Stack<>();      // Последовательность всех вершин, так чтобы при доставании элемента
-                                                                    // у всех входящих вершин были выставлены веса
-        boolean isTime = ( parameters.isTime() && !parameters.isMemory())  //определяем, по какому критерию ищем min вес
-                      || (!parameters.isTime() && !parameters.isMemory());
+        // у всех входящих вершин были выставлены веса
+        boolean isTime = (parameters.isTime() && !parameters.isMemory())  //определяем, по какому критерию ищем min вес
+                || (!parameters.isTime() && !parameters.isMemory());
         if (isTime) {
             logCollector.addLine("isTime optimization");
         }
-        for(CMTreeVertex head: tree.getHead()){
+        for (CMTreeVertex head : tree.getHead()) {
             queue.add(head);
             stack.add(head);
         }
         CMTreeVertex vertex;
-        while((vertex = queue.poll()) != null){ //заполняем стек
-            for (String nameIn: vertex.getCmLine().getIn()) {
+        while ((vertex = queue.poll()) != null) { //заполняем стек
+            for (String nameIn : vertex.getCmLine().getIn()) {
                 for (CMTreeVertex inVertex : vertex.getIn(nameIn)) {
-                    if(stack.contains(inVertex)) {
+                    if (stack.contains(inVertex)) {
                         stack.remove(inVertex);
                     }
                     queue.add(inVertex);
@@ -113,21 +114,21 @@ public class Parser {
                 }
             }
         }
-        while(!stack.empty()){
+        while (!stack.empty()) {
             vertex = stack.pop();      //берём эмелент и находим минимальный вес
-            if(vertex.getCmLine().getFlags().isCanPerform()) { // при условии, что эту строчку можно выполнить
+            if (vertex.getCmLine().getFlags().isCanPerform()) { // при условии, что эту строчку можно выполнить
                 int minWeightVertex = 0;
                 vertex.getCmLine().getProperties().setWeight(0);
                 logCollector.addLine("vertex : " + vertex.getCmLine().getCommand());
                 for (String nameIn : vertex.getCmLine().getIn()) {
                     int minWeightFile = Integer.MAX_VALUE;      //минимальный вес, во всех входящих строчках, для ОТДЕЛЬНОГО ВХОДНОГО ФАЙЛА
                     CMTreeVertex minInCMTreeVertex = null;
-                    if((new File(nameIn).exists())) {   // если такой файл существует
+                    if ((new File(nameIn).exists())) {   // если такой файл существует
                         minWeightFile = 0;
                     } else {
                         for (CMTreeVertex inVertex : vertex.getIn(nameIn)) {
                             if (inVertex.getCmLine().getFlags().isCanPerform()) {
-                                if(inVertex.getCmLine().getProperties().getWeight() < minWeightFile){
+                                if (inVertex.getCmLine().getProperties().getWeight() < minWeightFile) {
                                     minWeightFile = inVertex.getCmLine().getProperties().getWeight();
                                     minInCMTreeVertex = inVertex;
                                 }
@@ -148,7 +149,7 @@ public class Parser {
                     if (minWeightFile == Integer.MAX_VALUE) {
                         vertex.getCmLine().getFlags().setCanPerform(false);
                         vertex.getCmLine().getProperties().setWeight(vertex.getCmLine().getProperties().INFINITEWEIGHT);
-                        logCollector.addLine("file '" + nameIn +"'can not perform");
+                        logCollector.addLine("file '" + nameIn + "'can not perform");
                         break;
                     }
                     logCollector.addLine("file '" + nameIn + "' minWeight =" + minWeightFile);
@@ -164,20 +165,21 @@ public class Parser {
                     logCollector.addLine("minWeightVertex == " + minWeightVertex);
                     vertex.getCmLine().getProperties().setWeight(minWeightVertex);
                 } else {
-                    logCollector.addLine("vertex '"+ vertex.getCmLine().getCommand() +"' can not perform");
+                    logCollector.addLine("vertex '" + vertex.getCmLine().getCommand() + "' can not perform");
                 }
             }
         } // у всех вершин выставлен вес
         return tree;
     }
+
     private boolean performMinBranch(CMTree tree) throws IOException {
         CMTreeVertex minVertexHead = null;
         int minWeight = Integer.MAX_VALUE;
         logCollector.addLine("performMinBranch");
-        for (CMTreeVertex head: tree.getHead()) {
-            if(head.getCmLine().getFlags().isCanPerform()){
+        for (CMTreeVertex head : tree.getHead()) {
+            if (head.getCmLine().getFlags().isCanPerform()) {
                 logCollector.addLine("weight " + head + " == " + head.getCmLine().getProperties().getWeight());
-                if(head.getCmLine().getProperties().getWeight() < minWeight){
+                if (head.getCmLine().getProperties().getWeight() < minWeight) {
                     minVertexHead = head;
                     minWeight = head.getCmLine().getProperties().getWeight();
                 }
@@ -187,12 +189,12 @@ public class Parser {
         Queue<CMTreeVertex> queue = new LinkedList<>();
         queue.add(minVertexHead);
         CMTreeVertex vertex;
-        while((vertex = queue.poll()) != null){
-            if(!branch.contains(vertex.getCmLine())) {
+        while ((vertex = queue.poll()) != null) {
+            if (!branch.contains(vertex.getCmLine())) {
                 branch.add(vertex.getCmLine());
             }
-            for (String nameIn: vertex.getCmLine().getIn()) {
-                if(vertex.getMinIn(nameIn) != null) {
+            for (String nameIn : vertex.getCmLine().getIn()) {
+                if (vertex.getMinIn(nameIn) != null) {
                     queue.add(vertex.getMinIn(nameIn));
                 }
             }
@@ -235,21 +237,21 @@ public class Parser {
                     return false;
                 }
             }
-            boolean rez = ( pr.exitValue() == cmLine.getProperties().getCorrectReturnValue() );
-            if(!rez){
+            boolean rez = (pr.exitValue() == cmLine.getProperties().getCorrectReturnValue());
+            if (!rez) {
                 cmLine.getFlags().setCanPerform(false);
                 logCollector.addLine("incorrect return value " + cmLine.getCommand());
             } else {
                 logCollector.addLine("correct return value " + cmLine.getCommand());
                 rubbishCollector.addRubbish(cmLine);
             }
-            if(!cmLine.getProperties().isNullFilesMarks()){
-                for (Map.Entry entry: cmLine.getProperties().getFilesMarks().entrySet()){
-                    if ((Integer) entry.getKey() ==  pr.exitValue()){
-                        File newFile = new File((String)entry.getValue());
-                        if(newFile.createNewFile()){
+            if (!cmLine.getProperties().isNullFilesMarks()) {
+                for (Map.Entry entry : cmLine.getProperties().getFilesMarks().entrySet()) {
+                    if ((Integer) entry.getKey() == pr.exitValue()) {
+                        File newFile = new File((String) entry.getValue());
+                        if (newFile.createNewFile()) {
                             logCollector.addLine("create fileMarks: " + entry.getValue());
-                            rubbishCollector.addRubbish((String)entry.getValue(), cmLine);
+                            rubbishCollector.addRubbish((String) entry.getValue(), cmLine);
                             break;
                         } else {
                             logCollector.addLine("error create fileMarks: " + entry.getValue());
@@ -268,14 +270,15 @@ public class Parser {
             logCollector.addLine("finish " + cmLine.getCommand());
         }
     }
+
     private boolean performCMFile(CMFile branch) throws IOException {
         boolean flag = true;
         lighthouse.setError(false);
         int count = 0; //количесто выполненых операций
-        while(flag){
+        while (flag) {
 
             for (CMLine line : branch.getLines()) {
-                if(line.getFlags().isStart()){ // если строка уже была запушенна ранее, то и проверять её не нужно более
+                if (line.getFlags().isStart()) { // если строка уже была запушенна ранее, то и проверять её не нужно более
                     continue;
                 }
                 boolean canPerform = true;
@@ -286,12 +289,12 @@ public class Parser {
                         break;
                     }
                 }
-                if(canPerform) {
+                if (canPerform) {
                     lighthouse.increment();
                     line.getFlags().setStart(true);
                     CompletableFuture<Void> start = CompletableFuture.completedFuture(performCMLine(line))
-                            .thenAcceptAsync((x)-> {
-                                if(!x) {
+                            .thenAcceptAsync((x) -> {
+                                if (!x) {
                                     lighthouse.setError(true);
                                 }
                                 synchronized (lighthouse) {
@@ -301,26 +304,26 @@ public class Parser {
                             });
                     ++count;
                 }
-                if(count == branch.getSize()){// TODO: 24.10.2016 Реализовать правильную проверку на завершения вычисления ветви 
+                if (count == branch.getSize()) {// TODO: 24.10.2016 Реализовать правильную проверку на завершения вычисления ветви
                     flag = false;
                 }
             }
-            if(count == 0){
+            if (count == 0) {
                 System.err.println("error brach");
                 logCollector.addLine("error brach");
                 return false;
             }
             synchronized (lighthouse) {
-                if(lighthouse.count != 0) {
+                if (lighthouse.count != 0) {
                     try {
                         lighthouse.wait();
                     } catch (InterruptedException e) {
                         System.err.println(e.toString());
                     }
                 }
-                if(lighthouse.error) {
+                if (lighthouse.error) {
 
-                    while(lighthouse.count > 0) {
+                    while (lighthouse.count > 0) {
                         try {
                             lighthouse.wait();
                         } catch (InterruptedException e) {
@@ -340,16 +343,16 @@ public class Parser {
             Parser parser = new Parser();
             parser.parameters.addParameters(args);
             if (args.length == 0) {
-                if (! view(parser)) {
+                if (!view(parser)) {
                     System.exit(1);
                 }
             }
-            if(parser.start()){
+            if (parser.start()) {
                 System.exit(0);
             } else {
                 System.exit(1);
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             System.out.println("<Parser>" + e.toString());
             System.exit(2);
         }
@@ -387,8 +390,8 @@ public class Parser {
                         flg_s = true;
                         break;
                     case "--exit":
-                    case "-exit" :
-                    case "-e"    :
+                    case "-exit":
+                    case "-e":
                         System.exit(0);
                     default:
                         if (flg_o) {
@@ -412,7 +415,7 @@ public class Parser {
                 break;
             }
         }
-        return  true;
+        return true;
     }
 
     class Parameters {
@@ -424,14 +427,15 @@ public class Parser {
         private ArrayList<String> namesFileCM;
         private ArrayList<String> namesFileOut;
 
-        Parameters(){
+        Parameters() {
             namesFileCM = new ArrayList<>();
             namesFileOut = new ArrayList<>();
         }
+
         void addParameters(String[] args) throws IOException {
             boolean flg_o = false;
-            for (String str: args) {
-                switch (str){
+            for (String str : args) {
+                switch (str) {
                     case "-h":
                     case "-H":
                     case "--h":
@@ -448,7 +452,7 @@ public class Parser {
                         memory = true;
                         break;
                     default:
-                        if(flg_o){
+                        if (flg_o) {
                             addFileOut(str);
                             flg_o = false;
                         } else {
@@ -458,25 +462,32 @@ public class Parser {
                 }
             }
         }
+
         void addFileCM(String nameFile) {
             namesFileCM.add(nameFile);
         }
+
         void addFileOut(String nameFile) {
             namesFileOut.add(nameFile);
         }
+
         boolean isTime() {
             return time;
         }
+
         boolean isMemory() {
             return memory;
         }
+
         ArrayList<String> getNamesFileCM() {
             return namesFileCM;
         }
+
         ArrayList<String> getNamesFileOut() {
             return namesFileOut;
         }
-        void printHelp () {
+
+        void printHelp() {
             System.out.println("<Parser>: Для работы parser'а доступны следующие входные параметры:");
             System.out.println("<Parser>: -t  — Найти оптимальный путь по минимальному времени");
             System.out.println("<Parser>: -m  — Найти оптимальный путь по минимальному расходу памяти");
@@ -485,7 +496,8 @@ public class Parser {
             System.out.println("<Parser>: -o <nameFileOut> — установить выходной файл работы системы");
         }
     }
-    public class Lighthouse{
+
+    public class Lighthouse {
         /*
         * Вспомогательный класс, используется потоками для общения между собой
         * Хранит в себе количество выполняемых задач, и метку
@@ -493,15 +505,19 @@ public class Parser {
         * */
         private int count;
         private volatile boolean error;
-        Lighthouse(){
+
+        Lighthouse() {
             count = 0;
         }
-        synchronized void increment(){
+
+        synchronized void increment() {
             count++;
         }
-        synchronized void decrement(){
+
+        synchronized void decrement() {
             count--;
         }
+
         synchronized void setError(boolean error) {
             this.error = error;
         }
