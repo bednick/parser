@@ -209,34 +209,15 @@ public class Parser {
     private boolean performCMLine(CMLine cmLine) {
         try {
             cmLine.getFlags().setStart(true);
-            logCollector.addLine("start " + cmLine.getCommand());
+
             /**/
             //todo Заменить на вызов модуля
             Process pr = Runtime.getRuntime().exec(cmLine.getCommand());
             while (pr.isAlive()) {
                 try {
                     pr.waitFor();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-                    String inputLine = in.readLine();
-                    if (inputLine != null) {
-                        logCollector.addLine("Error stream:");
-                        while ((inputLine = in.readLine()) != null) {
-                            logCollector.addLine(inputLine);
-                        }
-                        logCollector.addLine("");
-                    }
-                    in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-                    inputLine = in.readLine();
-                    if (inputLine != null) {
-                        logCollector.addLine("Input stream:");
-                        while ((inputLine = in.readLine()) != null) {
-                            logCollector.addLine(inputLine);
-                        }
-                        logCollector.addLine("");
-                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    return false;
                 }
             }
             /**/
