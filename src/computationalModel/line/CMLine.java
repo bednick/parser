@@ -4,41 +4,35 @@ import computationalModel.line.comments.Comment;
 import computationalModel.line.comments.DownloadComment;
 import parser.LogCollector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Класс реализующий строку в вычислительной модели
  */
 public class CMLine implements Comparable<CMLine>{
-    public static final String DELIMITER_COMMENT = "#" ;
-    public static final String DELIMITER_ROLE = ";" ;
-    public static final String DELIMITER = " ";
+    private static final String DELIMITER_COMMENT = "#" ;
+    private static final String DELIMITER_ROLE = ";" ;
+    private static final String DELIMITER = " ";
 
     private String[] in;
     private ArrayList<String> out;
     private String command;
-    private String[] comments;
 
     private Properties properties;
     private Flags flags;
 
     public CMLine(String line, LogCollector log){
         try {
-            this.in = (String[]) Arrays.stream(((line.split(DELIMITER_ROLE, 3)[0])
-                    .split(DELIMITER))).filter(l-> !l.equals("")).toArray(String[]::new);
-            this.out = new ArrayList<String>();
-            for (String nameOut: (line.split(DELIMITER_ROLE, 3)[1]).split(DELIMITER)) {
-                out.add(nameOut);
-            }
+            this.in = Arrays.stream(((line.split(DELIMITER_ROLE, 3)[0])
+                    .split(DELIMITER))).filter(l-> !l.isEmpty()).toArray(String[]::new);
+            this.out = new ArrayList<>();
+            Collections.addAll(out, (line.split(DELIMITER_ROLE, 3)[1]).split(DELIMITER));
             this.command = line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2)[0];
+            String[] comments;
             if (line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2).length == 1) {
-                this.comments = new String[0];
+                comments = new String[0];
             } else {
-                this.comments = ((line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2)[1]).split(DELIMITER));
+                comments = ((line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2)[1]).split(DELIMITER));
             }
             this.properties = new Properties();
             this.flags = new Flags();
@@ -63,9 +57,6 @@ public class CMLine implements Comparable<CMLine>{
     }
     public String getCommand() {
         return command;
-    }
-    public String[] getComments() {
-        return comments;
     }
     public Flags getFlags() {
         return flags;
@@ -118,7 +109,7 @@ public class CMLine implements Comparable<CMLine>{
         private boolean finish;     // было ли завершено выполнение
 
 
-        public Flags(){
+        Flags(){
             this.rubbishOut = true;
             this.canPerform = true;
             this.start = false;
