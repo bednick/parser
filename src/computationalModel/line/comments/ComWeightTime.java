@@ -9,7 +9,7 @@ import parser.LogCollector;
 public class ComWeightTime extends Comment {
     @Override
     public void correct(CMLine cmLine, LogCollector log) {
-        cmLine.getProperties().setWeightTime((byte)Integer.parseInt(lastComment));
-        log.addLine(cmLine.toString() + " set weight time=" + (byte)Integer.parseInt(lastComment));
+        cmLine.getProperties().setWeightTime((byte) Integer.parseInt(lastComment));
+        log.addLine(cmLine.toString() + " set weight time=" + (byte) Integer.parseInt(lastComment));
     }
 }

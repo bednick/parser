@@ -15,8 +15,10 @@ public abstract class Comment {
     public Comment() {
         lastComment = null;
     }
+
     protected abstract void correct(CMLine cmLine, LogCollector log);
-    public void correct(CMLine cmLine, String comment, LogCollector log){
+
+    public void correct(CMLine cmLine, String comment, LogCollector log) {
         lastComment = comment;
         correct(cmLine, log);
     }

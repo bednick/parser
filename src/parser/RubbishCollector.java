@@ -13,19 +13,22 @@ public class RubbishCollector {
     private ArrayList<String> rubbish;
     private boolean working;
 
-    public RubbishCollector(LogCollector logCollector){
+    public RubbishCollector(LogCollector logCollector) {
         this.rubbish = new ArrayList<>();
         this.log = logCollector;
         this.working = true;
     }
-    public RubbishCollector(LogCollector logCollector, boolean working){
+
+    public RubbishCollector(LogCollector logCollector, boolean working) {
         this.rubbish = new ArrayList<>();
         this.log = logCollector;
         this.working = working;
     }
+
     public boolean isWorking() {
         return working;
     }
+
     public void setWorking(boolean working) {
         this.working = working;
     }
@@ -34,10 +37,10 @@ public class RubbishCollector {
         /*
         * Добавить в мусор выходные файлы, при условии что они помечены как мусор
         * */
-        if(cmLine.getFlags().isRubbishOut()){
+        if (cmLine.getFlags().isRubbishOut()) {
             for (String str : cmLine.getOut()) {
-                if(cmLine.getProperties().getFileNotRubbish() != null){
-                    if(cmLine.getProperties().getFileNotRubbish().contains(str)){
+                if (cmLine.getProperties().getFileNotRubbish() != null) {
+                    if (cmLine.getProperties().getFileNotRubbish().contains(str)) {
                         continue;
                     }
                 }
@@ -45,25 +48,27 @@ public class RubbishCollector {
             }
         }
     }
+
     public void addRubbish(String nameFile, CMLine cmLine) {
-        if(cmLine.getFlags().isRubbishOut()) {
-            if(!cmLine.getProperties().getFileNotRubbish().contains(nameFile)){
+        if (cmLine.getFlags().isRubbishOut()) {
+            if (!cmLine.getProperties().getFileNotRubbish().contains(nameFile)) {
                 rubbish.add(nameFile);
             }
         }
     }
-    public void clear(ArrayList<String> outParser){
+
+    public void clear(ArrayList<String> outParser) {
         /*
         * Удаление файлов, за исключение входных файлов парсера ( outParser )
         * */
         log.addLine("start delete files");
-        for(String str: rubbish){
-            if(!outParser.contains(str)){
+        for (String str : rubbish) {
+            if (!outParser.contains(str)) {
                 File file = new File(str);
                 if (file.exists()) {
-                    if(file.delete()) {
+                    if (file.delete()) {
                         log.addLine("detele file " + file.getName());
-                    } else{
+                    } else {
                         log.addLine("error delete file " + file.getName());
                     }
                 }

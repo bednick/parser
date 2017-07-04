@@ -11,13 +11,16 @@ public class ConfigFile {
     public ConfigFile(String nameConfigFile) {
         this.nameConfigFile = nameConfigFile;
     }
+
     public void setNameConfigFile(String nameConfigFile) {
         this.nameConfigFile = nameConfigFile;
     }
-    public void updateConfigFile(CMFile cmFile, LogCollector log){
+
+    public void updateConfigFile(CMFile cmFile, LogCollector log) {
 
     }
-    public void updateCMFile(CMFile cmFile, LogCollector log){
+
+    public void updateCMFile(CMFile cmFile, LogCollector log) {
 
     }
 }
