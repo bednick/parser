@@ -5,6 +5,7 @@ import computationalModel.line.CMLine;
 import computationalModel.tree.CMTree;
 import computationalModel.tree.CMTreeVertex;
 import parser.performing.Perform;
+import parser.performing.PerformUnix;
 import parser.performing.PerformWin;
 
 import java.io.*;
@@ -40,7 +41,7 @@ public class Parser {
         if (os.contains("Win")) {
             perform = new PerformWin();
         } else {
-            perform = null;
+            perform = new PerformUnix();
         }
     }
 
