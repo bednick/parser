@@ -43,5 +43,5 @@ public abstract class Perform {
         return pr;
     }
 
-    abstract Process start(CMLine line);
+    abstract Process start(CMLine line) throws IOException;
 }
