@@ -30,4 +30,4 @@ file_1 file_2;out.txt;echo "Hello world" >> out.txt
 ;file_1;echo .>file_1
 ;file_2;echo .>file_2
 
-file_1 file_2;out.txt;echo "Hello world" >> out.txt
+file_1 file_2;out.txt;echo Hello world >> out.txt
