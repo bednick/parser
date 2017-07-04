@@ -4,6 +4,8 @@ import computationalModel.file.CMFile;
 import computationalModel.line.CMLine;
 import computationalModel.tree.CMTree;
 import computationalModel.tree.CMTreeVertex;
+import parser.performing.Perform;
+import parser.performing.PerformWin;
 
 import java.io.*;
 import java.util.*;
@@ -24,6 +26,7 @@ public class Parser {
     private LogCollector logCollector;
     private RubbishCollector rubbishCollector;
     private ConfigFile configFile;
+    private Perform perform;
 
 
     public Parser() {
@@ -33,6 +36,12 @@ public class Parser {
         this.cmFile = new CMFile(logCollector);
         this.rubbishCollector = new RubbishCollector(logCollector);
         this.configFile = new ConfigFile("");
+        String os = System.getProperty("os.name" );
+        if (os.contains("Win")) {
+            perform = new PerformWin();
+        } else {
+            perform = null;
+        }
     }
 
     private boolean start() throws IOException {
@@ -41,6 +50,7 @@ public class Parser {
         * */
         try {
             logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString());
+            logCollector.addLine("os=" + System.getProperty("os.name" ));
             if (parameters.namesFileOut.size() == 0) {
                 return false;
             }
@@ -209,17 +219,8 @@ public class Parser {
     private boolean performCMLine(CMLine cmLine) {
         try {
             cmLine.getFlags().setStart(true);
-
             /**/
-            //todo Заменить на вызов модуля
-            Process pr = Runtime.getRuntime().exec(cmLine.getCommand());
-            while (pr.isAlive()) {
-                try {
-                    pr.waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            Process pr = perform.start(cmLine, logCollector);
             /**/
             boolean rez = (pr.exitValue() == cmLine.getProperties().getCorrectReturnValue());
             if (!rez) {
