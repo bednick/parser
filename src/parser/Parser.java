@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class Parser {
     private Parameters parameters;
-    private volatile Lighthouse lighthouse;
+    private final Lighthouse lighthouse;
     private CMFile cmFile;
     private LogCollector logCollector;
     private RubbishCollector rubbishCollector;
@@ -34,7 +34,7 @@ public class Parser {
         this.rubbishCollector = new RubbishCollector(logCollector);
         this.configFile = new ConfigFile("");
     }
-    public boolean start() throws IOException {
+    private boolean start() throws IOException {
         /*
         * Основная логика parser'а
         * */
@@ -215,7 +215,7 @@ public class Parser {
                     BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
                     String inputLine = in.readLine();
                     if (inputLine != null) {
-                        logCollector.addLine("Error stream ");
+                        logCollector.addLine("Error stream:");
                         while ((inputLine = in.readLine()) != null) {
                             logCollector.addLine(inputLine);
                         }
@@ -224,7 +224,7 @@ public class Parser {
                     in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
                     inputLine = in.readLine();
                     if (inputLine != null) {
-                        logCollector.addLine("Input stream ");
+                        logCollector.addLine("Input stream:");
                         while ((inputLine = in.readLine()) != null) {
                             logCollector.addLine(inputLine);
                         }
@@ -245,7 +245,7 @@ public class Parser {
             }
             if(!cmLine.getProperties().isNullFilesMarks()){
                 for (Map.Entry entry: cmLine.getProperties().getFilesMarks().entrySet()){
-                    if (((Integer)entry.getKey()).intValue() ==  pr.exitValue()){
+                    if ((Integer) entry.getKey() ==  pr.exitValue()){
                         File newFile = new File((String)entry.getValue());
                         if(newFile.createNewFile()){
                             logCollector.addLine("create fileMarks: " + entry.getValue());
@@ -328,8 +328,6 @@ public class Parser {
                         }
                     }
                     return false;
-                } else{
-                    //System.err.println(" not lighthouse.error");
                 }
             }
         }
@@ -359,7 +357,7 @@ public class Parser {
 
     }
 
-    public static boolean view(Parser parser) throws IOException {
+    private static boolean view(Parser parser) throws IOException {
         System.out.println("<Parser>: введите парамметры, для работы. Для запуска системы введите -s, для справки -h, для выхода -e");
         while (true) {
             BufferedReader streamIn = new BufferedReader(new InputStreamReader(System.in));
@@ -417,7 +415,7 @@ public class Parser {
         return  true;
     }
 
-    public class Parameters{
+    class Parameters {
         /* Хранит в себе все параметры,
         *
         * */
@@ -426,11 +424,11 @@ public class Parser {
         private ArrayList<String> namesFileCM;
         private ArrayList<String> namesFileOut;
 
-        public Parameters(){
+        Parameters(){
             namesFileCM = new ArrayList<>();
             namesFileOut = new ArrayList<>();
         }
-        public void addParameters(String[] args) throws IOException {
+        void addParameters(String[] args) throws IOException {
             boolean flg_o = false;
             for (String str: args) {
                 switch (str){
@@ -460,25 +458,25 @@ public class Parser {
                 }
             }
         }
-        public void addFileCM(String nameFile) {
+        void addFileCM(String nameFile) {
             namesFileCM.add(nameFile);
         }
-        public void addFileOut(String nameFile) {
+        void addFileOut(String nameFile) {
             namesFileOut.add(nameFile);
         }
-        public boolean isTime() {
+        boolean isTime() {
             return time;
         }
-        public boolean isMemory() {
+        boolean isMemory() {
             return memory;
         }
-        public ArrayList<String> getNamesFileCM() {
+        ArrayList<String> getNamesFileCM() {
             return namesFileCM;
         }
-        public ArrayList<String> getNamesFileOut() {
+        ArrayList<String> getNamesFileOut() {
             return namesFileOut;
         }
-        public void printHelp () {
+        void printHelp () {
             System.out.println("<Parser>: Для работы parser'а доступны следующие входные параметры:");
             System.out.println("<Parser>: -t  — Найти оптимальный путь по минимальному времени");
             System.out.println("<Parser>: -m  — Найти оптимальный путь по минимальному расходу памяти");
@@ -495,16 +493,16 @@ public class Parser {
         * */
         private int count;
         private volatile boolean error;
-        public Lighthouse(){
+        Lighthouse(){
             count = 0;
         }
-        public synchronized void increment(){
+        synchronized void increment(){
             count++;
         }
-        public synchronized void decrement(){
+        synchronized void decrement(){
             count--;
         }
-        public synchronized void setError(boolean error) {
+        synchronized void setError(boolean error) {
             this.error = error;
         }
     }

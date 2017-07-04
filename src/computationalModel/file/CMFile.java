@@ -41,7 +41,7 @@ public class CMFile {
             String buf;
             while((buf = reader.readLine()) != null) {
                 if(buf.length() > 2) {
-                    if(buf.charAt(0) != '#') {
+                    if(buf.charAt(0) != '#' && buf.charAt(1) != '#') {
                         lines.add(new CMLine(buf, log));
                     }
                 }
