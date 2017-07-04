@@ -10,19 +10,16 @@ import java.io.IOException;
 public class PerformUnix extends Perform {
 
     @Override
-    Process start(CMLine line) {
-        Process processUnix = null;
-        ProcessBuilder processBuilder = new ProcessBuilder(line.getCommand());
-        try {
-            processUnix = processBuilder.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    Process start(CMLine line) throws IOException {
+        Process processUnix;
+        ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", line.getCommand());
+        processUnix = processBuilder.start();
+
         return processUnix;
     }
 
-    public static void main(String[] args) {
-        String s = ";file_2;touch file_2";
+    public static void main(String[] args) throws IOException {
+        String s = "file_1 file_2;out.txt;echo \"Hello world\" >> out.txt";
         CMLine cmLine = new CMLine(s, null);
         PerformUnix performUnix = new PerformUnix();
         performUnix.start(cmLine);
