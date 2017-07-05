@@ -18,6 +18,7 @@ public class PerformUnix extends Perform {
         return processBuilder.start();
     }
 
+    /*
     public static void main(String[] args) throws IOException {
         String s = "file_1 file_2;out.txt;echo Hello world > out.txt";
         CMLine cmLine = new CMLine(s, null);
@@ -25,4 +26,5 @@ public class PerformUnix extends Perform {
         performUnix.start(cmLine);
 
     }
+    */
 }

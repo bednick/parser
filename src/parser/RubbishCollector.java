@@ -4,33 +4,44 @@ import computationalModel.line.CMLine;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Класс реализующий уничтожение временных файлов
  */
 public class RubbishCollector {
     private LogCollector log;
-    private ArrayList<String> rubbish;
-    private boolean working;
+    private List<String> rubbish;
+    private List<String> startEnvironment;
+    private List<String> outFileParser;
 
-    public RubbishCollector(LogCollector logCollector) {
+    RubbishCollector(LogCollector logCollector) {
         this.rubbish = new ArrayList<>();
+        this.startEnvironment = new ArrayList<>();
         this.log = logCollector;
-        this.working = true;
     }
 
-    public RubbishCollector(LogCollector logCollector, boolean working) {
-        this.rubbish = new ArrayList<>();
-        this.log = logCollector;
-        this.working = working;
+    public void setStartEnvironment(String dirName) {
+        if (dirName == null) {
+            return;
+        }
+        setStartEnvironment(new File(dirName));
     }
 
-    public boolean isWorking() {
-        return working;
+    private void setStartEnvironment(File dir) {
+        if (!dir.isDirectory()) {
+            throw new IllegalArgumentException(dir + " is not directory");
+        }
+        File[] files = dir.listFiles();
+        startEnvironment.clear();
+        if (files != null) {
+            Arrays.stream(files).forEach(file -> startEnvironment.add(file.getName()));
+        }
     }
 
-    public void setWorking(boolean working) {
-        this.working = working;
+    public void setOutFileParser(List<String> outFileParser) {
+        this.outFileParser = outFileParser;
     }
 
     public void addRubbish(CMLine cmLine) {
@@ -57,17 +68,18 @@ public class RubbishCollector {
         }
     }
 
-    public void clear(ArrayList<String> outParser) {
+    public void clear() {
         /*
         * Удаление файлов, за исключение входных файлов парсера ( outParser )
+        * и стартового окружения
         * */
         log.addLine("start delete files");
         for (String str : rubbish) {
-            if (!outParser.contains(str)) {
+            if (!outFileParser.contains(str) && !startEnvironment.contains(str)) {
                 File file = new File(str);
                 if (file.exists()) {
                     if (file.delete()) {
-                        log.addLine("detele file " + file.getName());
+                        log.addLine("delete file " + file.getName());
                     } else {
                         log.addLine("error delete file " + file.getName());
                     }
@@ -78,4 +90,20 @@ public class RubbishCollector {
         rubbish.clear();
     }
 
+    public void deleteAfterError(CMLine cmLine) {
+        log.addLine("start delete files after error");
+        for (String str : cmLine.getOut()) {
+            if (!startEnvironment.contains(str) && !cmLine.getProperties().getFileNotRubbish().contains(str)) {
+                File file = new File(str);
+                if (file.exists()) {
+                    if (file.delete()) {
+                        log.addLine("delete file " + file.getName());
+                    } else {
+                        log.addLine("error delete file " + file.getName());
+                    }
+                }
+            }
+        }
+        log.addLine("finish delete files after error");
+    }
 }
