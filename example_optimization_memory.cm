@@ -1,0 +1,16 @@
+## Пример использования задания весов с помощью метки(параметр-указание) "memory"
+## Синтаксис: memory=<вес - целое число от 0 до 100>
+
+## Для запуска:
+## example_optimization_memory.cm -o out.txt -m -s
+
+;file_1_1;echo .>file_1_1 #memory=20
+;file_1_2;echo .>file_1_2 #memory=20
+file_1_1 file_1_2;out.txt;echo "example memory 2 files" >> out.txt #memory=33
+
+;file_2_1;echo .>file_2_1 #memory=10
+;file_2_2;echo .>file_2_2 #memory=10
+;file_2_3;echo .>file_2_3 #memory=10
+file_2_1 file_2_2 file_2_3;out.txt;echo "example memory 3 files" >> out.txt #memory=33
+
+## После запуска в файле out.txt появится надпись "example memory 3 files", т.е. будет выбран путь меньшего веса, но большей длины
