@@ -20,7 +20,7 @@ public class PerformUnix extends Perform {
 
     /*
     public static void main(String[] args) throws IOException {
-        String s = "file_1 file_2;out.txt;echo Hello world > out.txt";
+        String s = ";file_ssh_yes ;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat";
         CMLine cmLine = new CMLine(s, null);
         PerformUnix performUnix = new PerformUnix();
         performUnix.start(cmLine);
