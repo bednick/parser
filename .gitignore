@@ -6,5 +6,5 @@
 
 !/README.md
 
-!/cm.cm
+!/*.cm
 !/build.xml
