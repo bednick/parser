@@ -1,36 +1,16 @@
-## Пример вычислительной модели
-##
-## Строки начинающиеся с символов ## считаются комментариями
-
-## Допускаются пустые строки
-##
-## Формат задания строки:
-
-## <входные файлы>;<выходные файлы>;<команда(команды разделённые “;”)>#<дополнительные параметры-указания>
-
-## символ “;” является обязательным как разделитель между входными и выходными файлами и выполняемой командой
-
-## Дополнительные параметры не является обязательным
-## Входные(Выходные) файлы разделяются между собой пробелами 
-
-## Дополнительные параметры разделяются между собой пробелами 
-
-## Пример строки из 2х входных файлов получаем 2 выходных
-##inFile_1 inFile_2;outFile_1 outFile_2;touch outFile_1 ; touch outFile_2
-
-## Далее приведётся пример работы системы Linux
-##(для работы примера необходимо, чтобы выполнялась команда touch - создание нового файла)
-
-##;file_1;touch file_1
-##;file_2;touch file_2
-
-##file_1 file_2;out.txt;echo "Hello world" >> out.txt
-
 ##копирует файл через ключ
 ##file_ssh_yes;file1;scp -i /Users/Anastasia/key_nusc_school_2017.dat hpcuser29@clu.nusc.ru:myFile.txt /Users/Anastasia
 
-;file_ssh1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main.cpp -o main 2>> error.txt ; touch file_ssh1
+##;f12;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat vim main2.cpp && #include <stdio.h> \n int main() { \n printf("It's working"); \n return 0; } && touch f12
+##f12;f13;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main2.cpp -o main2 2>> error.txt && ./main2 > hello.txt && rm main2
+
+##remotelyСm.cm -o f13 -s
+
+;file_ssh1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main.cpp -o main 2>> error.txt && touch file_ssh1
 file_ssh1;file_ssh2;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main && touch file_ssh2
+
+;file_ssh1;gcc /Users/Anastasia/main.cpp -o /Users/Anastasia/main 2>> error.txt && touch file_ssh1
+file_ssh1;file_ssh2; /Users/Anastasia/main >> hello.txt && touch file_ssh2
 
 ##remotelyСm.cm -o file_ssh2 -s запуск без ошибки
 
