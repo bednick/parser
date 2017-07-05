@@ -1,10 +1,7 @@
 /*
-
-!/src
-
 !/.gitignore
-
 !/README.md
 
+!/src
 !/*.cm
 !/build.xml

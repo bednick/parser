@@ -1,0 +1,19 @@
+## Пример использования задания весов с помощью метки(параметр-указание) "time"
+## Синтаксис: time=<вес - целое число от 0 до 100>
+
+## Для запуска(т.к. метка "time" используется по умолчанию):
+## example_optimization_time.cm -o out.txt -s
+## Или явно:
+## example_optimization_time.cm -o out.txt -t -s
+
+;file_1_1;echo .>file_1_1 #time=20
+;file_1_2;echo .>file_1_2 #time=20
+file_1_1 file_1_2;out.txt;echo "example time 2 files" >> out.txt #time=33
+
+;file_2_1;echo .>file_2_1 #time=10
+;file_2_2;echo .>file_2_2 #time=10
+;file_2_3;echo .>file_2_3 #time=10
+file_2_1 file_2_2 file_2_3;out.txt;echo "example time 3 files" >> out.txt #time=33
+
+## После запуска в файле out.txt появится надпись "example time 3 files", т.е. будет выбран путь меньшего веса, но большей длины
+

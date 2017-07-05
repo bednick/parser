@@ -1,0 +1,20 @@
+## Пример вычислительной модели
+##
+## Строки начинающиеся с символов ## считаются комментариями
+
+##копирует файл через ключ
+##file_ssh_yes;file1;scp -i /Users/Anastasia/key_nusc_school_2017.dat hpcuser29@clu.nusc.ru:myFile.txt /Users/Anastasia
+
+;file_ssh1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main.cpp -o main 2>> error.txt ; touch file_ssh1
+file_ssh1;file_ssh2;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main && touch file_ssh2
+
+##remotelyСm.cm -o file_ssh2 -s запуск без ошибки
+
+;file_ssh;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main 2>> error.txt ; touch file_ssh
+file_ssh;file;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main && touch file
+
+##remotelyСm.cm -o file -s запуск с ошибкой
+
+##file_ssh_yes;out.txt;echo Hello >> MyFile.txt ; touch out.txt
+
+##remotelyСm.cm -o out.txt -s

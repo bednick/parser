@@ -1,0 +1,15 @@
+## Пример использования задания весов с помощью меток(параметров-указаний) "time" или "memory"
+
+## Для запуска минимального по времени:
+## example_optimization.cm -o out.txt -t -s
+## Для запуска минимального по памяти:
+## example_optimization.cm -o out.txt -m -s
+
+;file_1_1;echo .>file_1_1 #time=10 memory=20
+;file_1_2;echo .>file_1_2 #time=10 memory=20
+file_1_1 file_1_2;out.txt;echo "example min time" >> out.txt
+
+;file_2_1;echo .>file_2_1 #time=20 memory=10
+;file_2_2;echo .>file_2_2 #time=20 memory=10
+file_2_1 file_2_2;out.txt;echo "example min memory" >> out.txt
+
