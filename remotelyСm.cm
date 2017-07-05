@@ -1,0 +1,44 @@
+## Пример вычислительной модели
+##
+## Строки начинающиеся с символов ## считаются комментариями
+
+## Допускаются пустые строки
+##
+## Формат задания строки:
+
+## <входные файлы>;<выходные файлы>;<команда(команды разделённые “;”)>#<дополнительные параметры-указания>
+
+## символ “;” является обязательным как разделитель между входными и выходными файлами и выполняемой командой
+
+## Дополнительные параметры не является обязательным
+## Входные(Выходные) файлы разделяются между собой пробелами 
+
+## Дополнительные параметры разделяются между собой пробелами 
+
+## Пример строки из 2х входных файлов получаем 2 выходных
+##inFile_1 inFile_2;outFile_1 outFile_2;touch outFile_1 ; touch outFile_2
+
+## Далее приведётся пример работы системы Linux
+##(для работы примера необходимо, чтобы выполнялась команда touch - создание нового файла)
+
+##;file_1;touch file_1
+##;file_2;touch file_2
+
+##file_1 file_2;out.txt;echo "Hello world" >> out.txt
+
+##копирует файл через ключ
+##file_ssh_yes;file1;scp -i /Users/Anastasia/key_nusc_school_2017.dat hpcuser29@clu.nusc.ru:myFile.txt /Users/Anastasia
+
+;file_ssh1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main.cpp -o main 2>> error.txt ; touch file_ssh1
+file_ssh1;file_ssh2;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main && touch file_ssh2
+
+##remotelyСm.cm -o file_ssh2 -s запуск без ошибки
+
+;file_ssh;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main 2>> error.txt ; touch file_ssh
+file_ssh;file;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main && touch file
+
+##remotelyСm.cm -o file -s запуск с ошибкой
+
+##file_ssh_yes;out.txt;echo Hello >> MyFile.txt ; touch out.txt
+
+##remotelyСm.cm -o out.txt -s
