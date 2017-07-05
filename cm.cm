@@ -18,14 +18,6 @@
 ## Пример строки из 2х входных файлов получаем 2 выходных
 inFile_1 inFile_2;outFile_1 outFile_2;touch outFile_1 ; touch outFile_2
 
-## Далее приведётся пример работы системы Win
-
-;file_1;echo .>file_1
-;file_2;echo .>file_2
-
-file_1 file_2;out.txt;echo Hello world >> out.txt
-
-
 ## Далее приведётся пример работы системы Linux
 ##(для работы примера необходимо, чтобы выполнялась команда touch - создание нового файла)
 
@@ -33,5 +25,13 @@ file_1 file_2;out.txt;echo Hello world >> out.txt
 ;file_2;touch file_2
 
 file_1 file_2;out.txt;echo "Hello world" >> out.txt
+
+## Далее приведётся пример работы системы Win
+
+;file_1;echo .>file_1
+;file_2;echo .>file_2
+
+file_1 file_2;out.txt;echo Hello world >> out.txt
+
 
 

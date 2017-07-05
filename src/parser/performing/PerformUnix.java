@@ -18,6 +18,7 @@ public class PerformUnix extends Perform {
         return processBuilder.start();
     }
 
+    /*
     public static void main(String[] args) throws IOException {
         String s = ";file_ssh_yes ;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat";
         CMLine cmLine = new CMLine(s, null);
@@ -25,4 +26,5 @@ public class PerformUnix extends Perform {
         performUnix.start(cmLine);
 
     }
+    */
 }

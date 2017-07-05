@@ -26,8 +26,9 @@ public class Parser {
     private CMFile cmFile;
     private LogCollector logCollector;
     private RubbishCollector rubbishCollector;
-    private ConfigFile configFile;
+   // private ConfigFile configFile;
     private Perform perform;
+    private String startPath;
 
 
     public Parser() {
@@ -36,13 +37,14 @@ public class Parser {
         this.logCollector = new LogCollector();
         this.cmFile = new CMFile(logCollector);
         this.rubbishCollector = new RubbishCollector(logCollector);
-        this.configFile = new ConfigFile("");
+        //this.configFile = new ConfigFile("");
         String os = System.getProperty("os.name" );
         if (os.contains("Win")) {
             perform = new PerformWin();
         } else {
             perform = new PerformUnix();
         }
+        startPath = Parser.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     }
 
     private boolean start() throws IOException {
@@ -66,7 +68,7 @@ public class Parser {
             } else {
                 logCollector.addLine("Parameter -t");
             }
-            configFile.updateCMFile(cmFile, logCollector);
+            //configFile.updateCMFile(cmFile, logCollector);
             for (String nameOut : parameters.getNamesFileOut()) {
                 CMTree tree = new CMTree(cmFile, nameOut);
 
@@ -79,7 +81,7 @@ public class Parser {
                             break;
                         }
                     }
-                    logCollector.addLine("set tree");
+                    logCollector.addLine("TREE:");
                     logCollector.addLine(tree.toString());
                     if (!isCanPerform) {
                         System.out.println("file '" + nameOut + "' can not get!");
@@ -90,7 +92,9 @@ public class Parser {
             }
             return true;
         } finally {
-            rubbishCollector.clear(parameters.getNamesFileOut());
+            rubbishCollector.setStartEnvironment(startPath);
+            rubbishCollector.setOutFileParser(parameters.getNamesFileOut());
+            rubbishCollector.clear();
             logCollector.addLine("\nFINISH PARSER " + new java.util.Date().toString());
             logCollector.push();
         }
@@ -106,9 +110,6 @@ public class Parser {
         // у всех входящих вершин были выставлены веса
         boolean isTime = (parameters.isTime() && !parameters.isMemory())  //определяем, по какому критерию ищем min вес
                 || (!parameters.isTime() && !parameters.isMemory());
-        if (isTime) {
-            logCollector.addLine("isTime optimization");
-        }
         for (CMTreeVertex head : tree.getHead()) {
             queue.add(head);
             stack.add(head);
@@ -130,7 +131,7 @@ public class Parser {
             if (vertex.getCmLine().getFlags().isCanPerform()) { // при условии, что эту строчку можно выполнить
                 int minWeightVertex = 0;
                 vertex.getCmLine().getProperties().setWeight(0);
-                logCollector.addLine("vertex : " + vertex.getCmLine().getCommand());
+                logCollector.addLine("VERTEX : " + vertex.getCmLine().getCommand());
                 for (String nameIn : vertex.getCmLine().getIn()) {
                     int minWeightFile = Integer.MAX_VALUE;      //минимальный вес, во всех входящих строчках, для ОТДЕЛЬНОГО ВХОДНОГО ФАЙЛА
                     CMTreeVertex minInCMTreeVertex = null;
@@ -143,17 +144,6 @@ public class Parser {
                                     minWeightFile = inVertex.getCmLine().getProperties().getWeight();
                                     minInCMTreeVertex = inVertex;
                                 }
-                                /*if(isTime){
-                                    if(inVertex.getCmLine().getProperties().getWeightTime() < minWeightFile){
-                                        minWeightFile = inVertex.getCmLine().getProperties().getWeightTime();
-                                        minInCMTreeVertex = inVertex;
-                                    }
-                                } else {
-                                    if(inVertex.getCmLine().getProperties().getWeightMemory() < minWeightFile){
-                                        minWeightFile = inVertex.getCmLine().getProperties().getWeightMemory();
-                                        minInCMTreeVertex = inVertex;
-                                    }
-                                }*/
                             }
                         }
                     }
@@ -173,7 +163,7 @@ public class Parser {
                     } else {
                         minWeightVertex += vertex.getCmLine().getProperties().getWeightMemory();
                     }
-                    logCollector.addLine("minWeightVertex == " + minWeightVertex);
+                    logCollector.addLine("MIN weight vertex == " + minWeightVertex);
                     vertex.getCmLine().getProperties().setWeight(minWeightVertex);
                 } else {
                     logCollector.addLine("vertex '" + vertex.getCmLine().getCommand() + "' can not perform");
@@ -186,10 +176,11 @@ public class Parser {
     private boolean performMinBranch(CMTree tree) throws IOException {
         CMTreeVertex minVertexHead = null;
         int minWeight = Integer.MAX_VALUE;
-        logCollector.addLine("performMinBranch");
+        logCollector.addLine("HEADS AND WEIGHTS");
         for (CMTreeVertex head : tree.getHead()) {
             if (head.getCmLine().getFlags().isCanPerform()) {
-                logCollector.addLine("weight " + head + " == " + head.getCmLine().getProperties().getWeight());
+                logCollector.addLine("weight ' " + head + " ' == "
+                        + head.getCmLine().getProperties().getWeight());
                 if (head.getCmLine().getProperties().getWeight() < minWeight) {
                     minVertexHead = head;
                     minWeight = head.getCmLine().getProperties().getWeight();
@@ -219,18 +210,19 @@ public class Parser {
 
     private boolean performCMLine(CMLine cmLine) {
         try {
+            //Исполнение команды(шага) и проерка его результата
             cmLine.getFlags().setStart(true);
-            /**/
             Process pr = perform.start(cmLine, logCollector);
-            /**/
             boolean rez = (pr.exitValue() == cmLine.getProperties().getCorrectReturnValue());
             if (!rez) {
                 cmLine.getFlags().setCanPerform(false);
                 logCollector.addLine("incorrect return value " + cmLine.getCommand());
+                rubbishCollector.deleteAfterError(cmLine);
             } else {
                 logCollector.addLine("correct return value " + cmLine.getCommand());
                 rubbishCollector.addRubbish(cmLine);
             }
+            //создание файлов меток
             if (!cmLine.getProperties().isNullFilesMarks()) {
                 for (Map.Entry entry : cmLine.getProperties().getFilesMarks().entrySet()) {
                     if ((Integer) entry.getKey() == pr.exitValue()) {
@@ -295,7 +287,7 @@ public class Parser {
                 }
             }
             if (count == 0) {
-                System.err.println("error branch");
+                //System.err.println("error branch");
                 logCollector.addLine("error branch");
                 return false;
             }

@@ -41,7 +41,7 @@ public class LogCollector {
     public void addLine(String string) {
         if (working) {
             log.add(string);
-            log.add("\n");
+            log.add(System.lineSeparator());
             try {
                 push();
             } catch (IOException e) {
