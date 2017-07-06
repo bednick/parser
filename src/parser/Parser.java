@@ -28,7 +28,8 @@ public class Parser {
     private RubbishCollector rubbishCollector;
    // private ConfigFile configFile;
     private Perform perform;
-    private String startPath;
+    private String path_environment;// путь к окружению
+    private String path_parser;     // путь к *.jar
 
 
     public Parser() {
@@ -44,7 +45,13 @@ public class Parser {
         } else {
             perform = new PerformUnix();
         }
-        startPath = Parser.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        try {
+            path_environment = new File(".").getCanonicalPath();
+        } catch (IOException e) {
+            logCollector.addLine(e.toString());
+            path_environment = new File(".").getAbsolutePath();
+        }
+        path_parser = Parser.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     }
 
     private boolean start() throws IOException {
@@ -52,8 +59,13 @@ public class Parser {
         * Основная логика parser'а
         * */
         try {
-            logCollector.addLine("\nSTART PARSER " + new java.util.Date().toString());
-            logCollector.addLine("os=" + System.getProperty("os.name" ));
+            logCollector.addLine("\n\nSTART PARSER " + new java.util.Date().toString());
+            logCollector.addLine("");
+            logCollector.addLine("OS = " + System.getProperty("os.name"));
+            logCollector.addLine("PATH_environment = "+path_environment);
+            logCollector.addLine("PATH_parser      = "+path_parser);
+            logCollector.addLine("set environment");
+            rubbishCollector.setStartEnvironment(path_environment);
             if (parameters.namesFileOut.size() == 0) {
                 return false;
             }
@@ -61,12 +73,10 @@ public class Parser {
                 cmFile.readFile(str);
                 logCollector.addLine("NAME CM '" + str + "'");
             }
-            if (parameters.isTime()) {
-                logCollector.addLine("Parameter -t");
-            } else if (parameters.isMemory()) {
-                logCollector.addLine("Parameter -m");
+            if (parameters.isMemory()) {
+                logCollector.addLine("OPTIMIZATION parameter : memory");
             } else {
-                logCollector.addLine("Parameter -t");
+                logCollector.addLine("OPTIMIZATION parameter : time");
             }
             //configFile.updateCMFile(cmFile, logCollector);
             for (String nameOut : parameters.getNamesFileOut()) {
@@ -84,7 +94,7 @@ public class Parser {
                     logCollector.addLine("TREE:");
                     logCollector.addLine(tree.toString());
                     if (!isCanPerform) {
-                        System.out.println("file '" + nameOut + "' can not get!");
+                        System.out.println("FILE '" + nameOut + "' CAN NOT GET!");
                         return false;
                     }
                     logCollector.push();
@@ -92,7 +102,6 @@ public class Parser {
             }
             return true;
         } finally {
-            rubbishCollector.setStartEnvironment(startPath);
             rubbishCollector.setOutFileParser(parameters.getNamesFileOut());
             rubbishCollector.clear();
             logCollector.addLine("\nFINISH PARSER " + new java.util.Date().toString());
@@ -149,7 +158,7 @@ public class Parser {
                     }
                     if (minWeightFile == Integer.MAX_VALUE) {
                         vertex.getCmLine().getFlags().setCanPerform(false);
-                        vertex.getCmLine().getProperties().setWeight(vertex.getCmLine().getProperties().INFINITEWEIGHT);
+                        vertex.getCmLine().getProperties().setWeight(vertex.getCmLine().getProperties().INFINITE_WEIGHT);
                         logCollector.addLine("file '" + nameIn + "'can not perform");
                         break;
                     }
@@ -157,7 +166,7 @@ public class Parser {
                     minWeightVertex += minWeightFile;
                     vertex.setMinInVertex(nameIn, minInCMTreeVertex);
                 }
-                if (vertex.getCmLine().getProperties().INFINITEWEIGHT != vertex.getCmLine().getProperties().getWeight()) {
+                if (vertex.getCmLine().getProperties().INFINITE_WEIGHT != vertex.getCmLine().getProperties().getWeight()) {
                     if (isTime) {
                         minWeightVertex += vertex.getCmLine().getProperties().getWeightTime();
                     } else {
@@ -220,23 +229,23 @@ public class Parser {
                 rubbishCollector.deleteAfterError(cmLine);
             } else {
                 logCollector.addLine("correct return value " + cmLine.getCommand());
-                rubbishCollector.addRubbish(cmLine);
-            }
-            //создание файлов меток
-            if (!cmLine.getProperties().isNullFilesMarks()) {
-                for (Map.Entry entry : cmLine.getProperties().getFilesMarks().entrySet()) {
-                    if ((Integer) entry.getKey() == pr.exitValue()) {
-                        File newFile = new File((String) entry.getValue());
-                        if (newFile.createNewFile()) {
-                            logCollector.addLine("create fileMarks: " + entry.getValue());
-                            rubbishCollector.addRubbish((String) entry.getValue(), cmLine);
-                            break;
+                // создание файла метки, если это необходимо
+                if (!cmLine.getProperties().isNullFilesMarks()) {
+                    File fileMark = new File(cmLine.getProperties().getFilesMark());
+                    if (!fileMark.exists()) {
+                        if (fileMark.createNewFile()) {
+                            logCollector.addLine("CREATE file mark: " + fileMark.getName());
+                            rubbishCollector.addRubbish(fileMark.getName(), cmLine);
                         } else {
-                            logCollector.addLine("error create fileMarks: " + entry.getValue());
-                            rez = false;
+                            logCollector.addLine("ERROR CREATE file mark: " + fileMark.getName());
                         }
+                    } else {
+                        logCollector.addLine("EXISTS file mark: '" + fileMark.getName() + "' (not rubbish)");
                     }
+
                 }
+                //System.out.println("add rubb");
+                rubbishCollector.addRubbish(cmLine);
             }
             return rez;
         } catch (IOException e) {

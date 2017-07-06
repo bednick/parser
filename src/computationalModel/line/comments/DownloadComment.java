@@ -14,7 +14,7 @@ public class DownloadComment {
         map.put("result", new ComResult());
         map.put("rubbish", new ComRubbish());
         map.put("notRubbish", new ComNotRubbish());
-        map.put("createMark", new ComCreateMark());
+        map.put("mark", new ComCreateMark());
         map.put("time", new ComWeightTime());
         map.put("memory", new ComWeightMemory());
     }

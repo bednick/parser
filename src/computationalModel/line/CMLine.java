@@ -15,7 +15,7 @@ public class CMLine implements Comparable<CMLine> {
     private static final String DELIMITER = " ";
 
     private String[] in;
-    private ArrayList<String> out;
+    private String[] out;
     private String command;
 
     private Properties properties;
@@ -25,8 +25,7 @@ public class CMLine implements Comparable<CMLine> {
         try {
             this.in = Arrays.stream(((line.split(DELIMITER_ROLE, 3)[0])
                     .split(DELIMITER))).filter(l -> !l.isEmpty()).toArray(String[]::new);
-            this.out = new ArrayList<>();
-            Collections.addAll(out, (line.split(DELIMITER_ROLE, 3)[1]).split(DELIMITER));
+            this.out = Arrays.stream((line.split(DELIMITER_ROLE, 3)[1]).split(DELIMITER)).filter(l-> !l.isEmpty()).toArray(String[]::new);
             this.command = line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2)[0];
             String[] comments;
             if (line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2).length == 1) {
@@ -54,7 +53,7 @@ public class CMLine implements Comparable<CMLine> {
         return in;
     }
 
-    public ArrayList<String> getOut() {
+    public String[] getOut() {
         return out;
     }
 
@@ -78,8 +77,8 @@ public class CMLine implements Comparable<CMLine> {
         if (command.compareTo(o.command) == 0) {
             if (in.length != o.in.length) {
                 return in.length - o.in.length;
-            } else if (out.size() != o.out.size()) {
-                return out.size() - o.out.size();
+            } else if (out.length != o.out.length) {
+                return out.length - o.out.length;
             } else {
                 return 0;
             }
@@ -167,26 +166,26 @@ public class CMLine implements Comparable<CMLine> {
         * 0 - минимальный приоритет
         * 100 - максимальный приоритет
         * */
-        public final byte MAXWEIGHT = 100;
-        public final byte MINWEIGHT = 0;
+        public final byte MAX_WEIGHT = 100;
+        public final byte MIN_WEIGHT = 0;
         //public final int DEFAULTCOLOR = -1;
-        public final int INFINITEWEIGHT = Integer.MAX_VALUE;
+        public final int INFINITE_WEIGHT = Integer.MAX_VALUE;
 
         private int weight;        //вес, используемый при работе( при вычислении оптимального пути)
         //private int color;         //используется при выборе оптимального пути () или нет
         private byte weightTime;    //вес, отвечающий за скорость работы
         private byte weightMemory;  //вес, отвечающий за память, занимающую процессом
         private int correctReturnValue; // Какое возвращаемое значение считать корректным
-        private Map<Integer, String> filesMarks; // хранит Integer - возвращаемое значение при выполнении, String - имя файла, который нужно создать
+        private String filesMark; // хранит String - имя файла, который нужно создать при успешном выполнении
         private ArrayList<String> filesNotRubbish;
 
         public Properties() {
-            this.weight = (MAXWEIGHT - MINWEIGHT) / 2;
+            this.weight = (MAX_WEIGHT - MIN_WEIGHT) / 2;
             //this.color = DEFAULTCOLOR;
-            this.weightTime = (MAXWEIGHT - MINWEIGHT) / 4;
-            this.weightMemory = (MAXWEIGHT - MINWEIGHT) / 4;
+            this.weightTime = (MAX_WEIGHT - MIN_WEIGHT) / 4;
+            this.weightMemory = (MAX_WEIGHT - MIN_WEIGHT) / 4;
             this.correctReturnValue = 0;
-            this.filesMarks = null;
+            this.filesMark = null;
             this.filesNotRubbish = null;
         }
 
@@ -209,19 +208,16 @@ public class CMLine implements Comparable<CMLine> {
             return correctReturnValue;
         }
 
-        public Map<Integer, String> getFilesMarks() {
-            if (filesMarks == null) {
-                filesMarks = new HashMap<>();
-            }
-            return filesMarks;
+        public void setFilesMark(String filesMark) {
+            this.filesMark = filesMark;
+        }
+
+        public String getFilesMark() {
+            return filesMark;
         }
 
         public boolean isNullFilesMarks() {
-            if (filesMarks == null) {
-                return true;
-            } else {
-                return false;
-            }
+            return filesMark == null;
         }
 
         public ArrayList<String> getFileNotRubbish() {
@@ -243,20 +239,20 @@ public class CMLine implements Comparable<CMLine> {
         //    this.color = color;
         //}
         public void setWeightMemory(byte weightMemory) {
-            if (weightMemory > MAXWEIGHT) {
-                this.weightMemory = MAXWEIGHT;
-            } else if (weightMemory < MINWEIGHT) {
-                this.weightMemory = MINWEIGHT;
+            if (weightMemory > MAX_WEIGHT) {
+                this.weightMemory = MAX_WEIGHT;
+            } else if (weightMemory < MIN_WEIGHT) {
+                this.weightMemory = MIN_WEIGHT;
             } else {
                 this.weightMemory = weightMemory;
             }
         }
 
         public void setWeightTime(byte weightTime) {
-            if (weightTime > MAXWEIGHT) {
-                this.weightTime = MAXWEIGHT;
-            } else if (weightTime < MINWEIGHT) {
-                this.weightTime = MINWEIGHT;
+            if (weightTime > MAX_WEIGHT) {
+                this.weightTime = MAX_WEIGHT;
+            } else if (weightTime < MIN_WEIGHT) {
+                this.weightTime = MIN_WEIGHT;
             } else {
                 this.weightTime = weightTime;
             }

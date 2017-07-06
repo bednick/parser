@@ -4,6 +4,9 @@ import computationalModel.line.CMLine;
 import parser.LogCollector;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /**
@@ -27,32 +30,30 @@ public class CMFile {
     }
 
     public void readFile(String nameFile) throws IOException {
-        /* Считываем файл, заполняем List из строк
+        /* Считываем файл, заполняем List из строк - CMLine
          * Считывание построчное
+         * '\' - Символ переноса строки
+         * Строки начинающиеся с символов '##' игнорируются
          * */
-        BufferedReader reader = null;
-        try {
-            File file = new File(nameFile);
-            if (file.isFile() && file.canRead()) {
-                reader = new BufferedReader(new InputStreamReader(new FileInputStream(nameFile)));
-            } else {
-                throw new IOException("Не удалось прочитать файл " + nameFile);
-            }
-            String buf;
-            while ((buf = reader.readLine()) != null) {
-                if (buf.length() > 2) {
-                    if (buf.charAt(0) != '#' && buf.charAt(1) != '#') {
-                        lines.add(new CMLine(buf, log));
+        String lastLine = Files.lines(Paths.get(nameFile), StandardCharsets.UTF_8)
+                .filter(line->line.length() > 3)
+                .filter(line->line.charAt(0) != '#' && line.charAt(1) != '#')
+                .reduce((line_1,line_2)-> {
+                    if (line_1.endsWith("\\")) {
+                        return line_1.substring(0, line_1.length()-1)+line_2;
+                    } else {
+                        lines.add(new CMLine(line_1, log));
+                        return line_2;
                     }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            throw new IOException("Ошибка при открытии файла " + nameFile);
-        } catch (IOException e) {
-            throw new IOException("ошибка чтения файла " + nameFile);
-        } finally {
-            if (reader != null) {
-                reader.close();
+                }).orElse("");
+
+        if (lastLine.isEmpty()) {
+            log.addLine("File '" + nameFile + "' is EMPTY");
+        } else {
+            if (lastLine.endsWith("\\")) {
+                lines.add(new CMLine(lastLine.substring(0, lastLine.length()-1), log));
+            } else {
+                lines.add(new CMLine(lastLine, log));
             }
         }
     }
@@ -80,12 +81,18 @@ public class CMFile {
          * */
         ArrayList<CMLine> newArrayList = new ArrayList<>();
         for (CMLine i : lines) {
+            if ( name.equals(i.getProperties().getFilesMark()) ) {
+                newArrayList.add(i);
+                continue;
+                // todo проверку в считывании файла (Проверка в слитывании марки, что его нет в выхолных файлах)
+            }
             for (String str : i.getOut()) {
                 if (str.equals(name)) {
                     newArrayList.add(i);
                     break;
                 }
             }
+
         }
         return newArrayList;
     }
