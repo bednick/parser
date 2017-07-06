@@ -1,24 +1,37 @@
-##копирует файл через ключ
-##file_ssh_yes;file1;scp -i /Users/Anastasia/key_nusc_school_2017.dat hpcuser29@clu.nusc.ru:myFile.txt /Users/Anastasia
 
-##;f12;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat vim main2.cpp && #include <stdio.h> \n int main() { \n printf("It's working"); \n return 0; } && touch f12
-##f12;f13;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main2.cpp -o main2 2>> error.txt && ./main2 > hello.txt && rm main2
+## Копирует файл через ключ
+## file_ssh_yes;file1;scp -i /Users/Anastasia/key_nusc_school_2017.dat hpcuser29@clu.nusc.ru:myFile.txt /Users/Anastasia
 
-##remotelyСm.cm -o f13 -s
+## 1
+##;file_exist;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main.cpp && touch file_exist
+;file_ssh1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main.cpp -o main && touch file_ssh1
+file_ssh1;hello1.txt;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello1.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main
 
-;file_ssh1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main.cpp -o main 2>> error.txt && touch file_ssh1
-file_ssh1;file_ssh2;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main && touch file_ssh2
+/Users/Anastasia/main.cpp;main;gcc /Users/Anastasia/main.cpp -o /Users/Anastasia/main 2>> error.txt && touch file_ssh1
+/Users/Anastasia/main;hello1.txt;/Users/Anastasia/main > hello1.txt && rm /Users/Anastasia/main
 
-;file_ssh1;gcc /Users/Anastasia/main.cpp -o /Users/Anastasia/main 2>> error.txt && touch file_ssh1
-file_ssh1;file_ssh2; /Users/Anastasia/main >> hello.txt && touch file_ssh2
+## пример запуска с "отваливанием" интернета
+## remotelyСm.cm -o hello1.txt -s
 
-##remotelyСm.cm -o file_ssh2 -s запуск без ошибки
+## 2
+##;file_exist;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp && touch file_exist
+;main1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main1
+main1;hello.txt;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main1 > hello.txt
 
-;file_ssh;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main 2>> error.txt ; touch file_ssh
-file_ssh;file;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main && touch file
+/Users/Anastasia/main1.cpp;main1;gcc /Users/Anastasia/main1.cpp -o /Users/Anastasia/main1
+/Users/Anastasia/main1;hello.txt;/Users/Anastasia/main1 > hello.txt && rm /Users/Anastasia/main1
 
-##remotelyСm.cm -o file -s запуск с ошибкой
+## пример запуска с отсутствием сипипи на сервере
+## remotelyСm.cm -o hello.txt -s
 
-##file_ssh_yes;out.txt;echo Hello >> MyFile.txt ; touch out.txt
+## 3
 
-##remotelyСm.cm -o out.txt -s
+;file_exist;touch file_exist;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp              #result=0
+;file_not_exist;touch file_not_exist && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp   #result=1
+file_exist;file_ssh3;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main2 && touch file_ssh3
+file_not_exist;file_exist ; scp -i /Users/Anastasia/key_nusc_school_2017.dat /Users/Anastasia/main1.cpp hpcuser29@clu.nusc.ru:~/ && touch file_exist
+file_ssh3;hello2.txt;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main2 > hello2.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main1.cpp && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main2
+
+
+## пример запуска с отсутствием сипипи на сервере [вариант копирования]
+## remotelyСm.cm -o hello2.txt -s
