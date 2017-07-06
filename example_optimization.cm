@@ -13,3 +13,9 @@ file_1_1 file_1_2;out.txt;echo "example min time" >> out.txt
 ;file_2_2;echo .>file_2_2 #time=20 memory=10
 file_2_1 file_2_2;out.txt;echo "example min memory" >> out.txt
 
+
+## Пример ветви самого минимального веса, но которая не может быть выполнена
+## из-за ошибки (команда "error_echo")
+;file_3_1;error_echo .>file_3_1 #time=5 memory=5
+;file_3_2;echo .>file_3_2 #time=5 memory=5
+file_3_1 file_3_2;out.txt;echo "example error branch" >> out.txt
