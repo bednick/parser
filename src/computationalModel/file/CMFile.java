@@ -4,7 +4,12 @@ import computationalModel.line.CMLine;
 import parser.LogCollector;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Класс описывающий ВМ (либо её часть)
@@ -13,48 +18,60 @@ public class CMFile {
     private ArrayList<CMLine> lines;
     private ArrayList<String> onlyInput;
     private LogCollector log;
+    // возможно вынести в класс?
+    private Variables variables;
 
     public CMFile(LogCollector log) {
         this.lines = new ArrayList<>();
         this.log = log;
-
+        this.variables = new Variables(log);
     }
 
     public CMFile(ArrayList<CMLine> lines, LogCollector log) {
         this.lines = lines;
         this.log = log;
+        this.variables = new Variables(log);
         //this.setOnlyInput();
     }
 
     public void readFile(String nameFile) throws IOException {
-        /* Считываем файл, заполняем List из строк
+        /* Считываем файл, заполняем List из строк - CMLine
          * Считывание построчное
+         * '\' - Символ переноса строки
+         * Строки начинающиеся с символов '##' игнорируются
+         * Строки начинающиеся с '#' расцениваются как переменные(Variables)
          * */
-        BufferedReader reader = null;
-        try {
-            File file = new File(nameFile);
-            if (file.isFile() && file.canRead()) {
-                reader = new BufferedReader(new InputStreamReader(new FileInputStream(nameFile)));
-            } else {
-                throw new IOException("Не удалось прочитать файл " + nameFile);
-            }
-            String buf;
-            while ((buf = reader.readLine()) != null) {
-                if (buf.length() > 2) {
-                    if (buf.charAt(0) != '#' && buf.charAt(1) != '#') {
-                        lines.add(new CMLine(buf, log));
+        String lastLine = Files.lines(Paths.get(nameFile), StandardCharsets.UTF_8)
+                .filter(line-> (line.length() == 1)
+                        || (line.length() >= 2 && line.charAt(0) != '#')
+                        || (line.length() >= 2 && line.charAt(0) == '#' && line.charAt(1) != '#'))
+                .reduce((line_1,line_2)-> {
+                    if (line_1.endsWith("\\")) {
+                        return line_1.substring(0, line_1.length()-1)+line_2;
+                    } else {
+                        processLine(line_1);
+                        return line_2;
                     }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            throw new IOException("Ошибка при открытии файла " + nameFile);
-        } catch (IOException e) {
-            throw new IOException("ошибка чтения файла " + nameFile);
-        } finally {
-            if (reader != null) {
-                reader.close();
+                }).orElse("");
+
+        if (lastLine.isEmpty()) {
+            log.addLine("File '" + nameFile + "' is EMPTY");
+        } else {
+            if (lastLine.endsWith("\\")) {
+                processLine(lastLine.substring(0, lastLine.length()-1));
+            } else {
+                processLine(lastLine);
             }
         }
+    }
+
+    private void processLine(String line) {
+        if (line.startsWith("#")) {
+            variables.put(line);
+        } else {
+            lines.add(new CMLine(line, log, variables));
+        }
+
     }
 
     public ArrayList<CMLine> getForIn(String name) {
@@ -80,12 +97,18 @@ public class CMFile {
          * */
         ArrayList<CMLine> newArrayList = new ArrayList<>();
         for (CMLine i : lines) {
+            if ( name.equals(i.getProperties().getFilesMark()) ) {
+                newArrayList.add(i);
+                continue;
+                // todo проверку в считывании файла (Проверка в слитывании марки, что его нет в выхолных файлах)
+            }
             for (String str : i.getOut()) {
                 if (str.equals(name)) {
                     newArrayList.add(i);
                     break;
                 }
             }
+
         }
         return newArrayList;
     }

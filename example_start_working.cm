@@ -30,4 +30,10 @@ file_1 file_2;out.txt;echo "Hello world" >> out.txt
 file_1 file_2;out.txt;echo Hello world >> out.txt
 
 
+## Символ '\' является символом переноса строки
+##
+## Пример корректного переноса:
+
+file_1 file_2;out.txt;\
+echo Hello world >> out.txt
 
