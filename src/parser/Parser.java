@@ -26,7 +26,7 @@ public class Parser {
     private CMFile cmFile;
     private LogCollector logCollector;
     private RubbishCollector rubbishCollector;
-   // private ConfigFile configFile;
+    private ConfigFile configFile;
     private Perform perform;
     private String path_environment;// путь к окружению
     private String path_parser;     // путь к *.jar
@@ -51,7 +51,13 @@ public class Parser {
             logCollector.addLine(e.toString());
             path_environment = new File(".").getAbsolutePath();
         }
-        path_parser = Parser.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        path_parser = new File(Parser.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent();
+
+        logCollector.addLine("\n\nSTART SYSTEM");
+        logCollector.addLine("OS = " + System.getProperty("os.name"));
+        logCollector.addLine("PATH_environment = "+path_environment);
+        logCollector.addLine("PATH_parser      = "+path_parser);
+        configFile = new ConfigFile(path_environment, path_parser, logCollector);
     }
 
     private boolean start() throws IOException {
@@ -61,17 +67,15 @@ public class Parser {
         try {
             logCollector.addLine("\n\nSTART PARSER " + new java.util.Date().toString());
             logCollector.addLine("");
-            logCollector.addLine("OS = " + System.getProperty("os.name"));
-            logCollector.addLine("PATH_environment = "+path_environment);
-            logCollector.addLine("PATH_parser      = "+path_parser);
-            logCollector.addLine("set environment");
+            logCollector.addLine("SET ENVIRONMENT");
             rubbishCollector.setStartEnvironment(path_environment);
             if (parameters.namesFileOut.size() == 0) {
-                return false;
+                logCollector.addLine("SIZE FILES OUT == 0");
+                return true;
             }
-            for (String str : parameters.getNamesFileCM()) {//считываем все входные CM
-                cmFile.readFile(str);
-                logCollector.addLine("NAME CM '" + str + "'");
+            if (readCMFiles() == 0) {
+                logCollector.addLine("FILES CM NOT FOUND");
+                return false;
             }
             if (parameters.isMemory()) {
                 logCollector.addLine("OPTIMIZATION parameter : memory");
@@ -101,12 +105,40 @@ public class Parser {
                 } while (!performMinBranch(tree));
             }
             return true;
+        } catch (IOException e) {
+            logCollector.addLine(e.toString());
+            throw e;
         } finally {
             rubbishCollector.setOutFileParser(parameters.getNamesFileOut());
             rubbishCollector.clear();
             logCollector.addLine("\nFINISH PARSER " + new java.util.Date().toString());
             logCollector.push();
         }
+    }
+
+    private int readCMFiles() {
+        int countCMFile = 0;
+        for (String str : parameters.getNamesFileCM()) {//считываем все входные CM
+            if (readCMFile(str)) {
+                ++countCMFile; // Если не удалось найти такой вычислительной модели по всем путям
+            }
+        }
+        return countCMFile;
+    }
+
+    private boolean readCMFile(String nameFile) {
+        List<String> allPath = new ArrayList<>();
+        for(String path: configFile.getPathCM()) {
+            try {
+                cmFile.readFile(path+"\\"+nameFile);
+                logCollector.addLine("NAME CM '" + path+"\\"+nameFile+ "'");
+                return true;
+
+            } catch (IOException e) {
+                logCollector.addLine("Error path: " +path+"\\"+nameFile);
+            }
+        }
+        return false;
     }
 
     private CMTree setMinWeight(CMTree tree) {
@@ -340,7 +372,7 @@ public class Parser {
                 System.exit(1);
             }
         } catch (IOException e) {
-            System.out.println("<Parser>" + e.toString());
+            System.err.println("<Parser>" + e.toString());
             System.exit(2);
         }
         //HashMap<String, Integer> hashMap = new HashMap<>();

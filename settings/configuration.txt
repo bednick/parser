@@ -1,0 +1,9 @@
+# Конфигурационный файл
+
+# default_weight - вес не помеченных вершин(не зависит он типа веса)
+default_weight=25
+
+# path_cm - пути к местам, в которых дополнительно к окружению нужно искать файлы *.cm
+# задание путей относительно: path_environment, path_parser
+path_cm=$path_parser/cm;$path_environment/cm
+
