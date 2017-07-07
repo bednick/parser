@@ -3,5 +3,6 @@
 !/README.md
 
 !/src
-!/*.cm
+!/settings
+!/cm
 !/build.xml

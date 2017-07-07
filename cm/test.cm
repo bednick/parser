@@ -1,0 +1,10 @@
+## Проверка файлов меток
+## test.cm -o out.txt -s
+
+#define CREATE echo "example test" >> out.txt
+
+
+;file_1_1;echo .>fi\
+le_1_1
+;;echo ""#mark=file_1_2
+file_1_1 file_1_2;out.txt;$CREATE
