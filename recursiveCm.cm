@@ -1,0 +1,7 @@
+## ## *********************************************************************************
+
+#define PATH /Users/Anastasia
+
+
+    ; innerCm.cm ; makeInnerCm.sh
+    innerCm.cm ; example.txt ; java -jar parser.jar

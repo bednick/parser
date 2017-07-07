@@ -1,36 +1,71 @@
+## ## ***********************************************************************************
+
+#define PATH /Users/Anastasia/exampleParser
+#define SSH_con ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat
+#define SCP_con scp -i /Users/Anastasia/key_nusc_school_2017.dat /Users/Anastasia/main1.cpp hpcuser29@clu.nusc.ru:~/
 
 ## Копирует файл через ключ
 ## file_ssh_yes;file1;scp -i /Users/Anastasia/key_nusc_school_2017.dat hpcuser29@clu.nusc.ru:myFile.txt /Users/Anastasia
 
-## 1
-##;file_exist;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main.cpp && touch file_exist
-;file_ssh1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main.cpp -o main && touch file_ssh1
-file_ssh1;hello1.txt;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main > hello1.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main
+###### 1
 
-/Users/Anastasia/main.cpp;main;gcc /Users/Anastasia/main.cpp -o /Users/Anastasia/main 2>> error.txt && touch file_ssh1
-/Users/Anastasia/main;hello1.txt;/Users/Anastasia/main > hello1.txt && rm /Users/Anastasia/main
+##;file_exist ; $SSH_con cat main.cpp && touch file_exist -- проверка на существование файла
+## START ***********************************************************************************
+    ;file_ssh1 ; $SSH_con gcc main.cpp -o main && \
+                 touch file_ssh1
+
+    file_ssh1 ; example1.txt ; $SSH_con ./main > example1.txt && \
+                             $SSH_con rm main
+## FINISH ***********************************************************************************
+
+## START ***********************************************************************************
+    /Users/Anastasia/exampleParser/main.cpp ; /Users/Anastasia/exampleParser/main ; gcc $PATH/main.cpp -o $PATH/main
+
+    /Users/Anastasia/exampleParser/main ; example1.txt ; $PATH/main > example1.txt && \
+                                          rm $PATH/main
+## FINISH ***********************************************************************************
 
 ## пример запуска с "отваливанием" интернета
-## remotelyСm.cm -o hello1.txt -s
+## remotelyСm.cm -o example1.txt -s
 
-## 2
-##;file_exist;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp && touch file_exist
-;main1;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main1
-main1;hello.txt;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main1 > hello.txt
+###### 2
 
-/Users/Anastasia/main1.cpp;main1;gcc /Users/Anastasia/main1.cpp -o /Users/Anastasia/main1
-/Users/Anastasia/main1;hello.txt;/Users/Anastasia/main1 > hello.txt && rm /Users/Anastasia/main1
+##;file_exist ; $SSH_con cat main1.cpp && touch file_exist  -- проверка на существование файла
+## START ***********************************************************************************
+    ;main1 ; $SSH_con gcc main1.cpp -o main1
+
+    main1 ; example2.txt ; $SSH_con t ./main1 > example2.txt
+## FINISH***********************************************************************************
+
+## START ***********************************************************************************
+    /Users/Anastasia/exampleParser/main1.cpp ; /Users/Anastasia/exampleParser/main1 ; gcc $PATH/main1.cpp -o $PATH/main1
+
+    /Users/Anastasia/exampleParser/main1 ; example2.txt ; $PATH/main1 > example2.txt && \
+                                         rm $PATH/main1
+## FINISH ***********************************************************************************
 
 ## пример запуска с отсутствием сипипи на сервере
-## remotelyСm.cm -o hello.txt -s
+## remotelyСm.cm -o example2.txt -s
 
-## 3
-;file_exist;touch file_exist;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp              #result=0
-;file_not_exist;touch file_not_exist && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp   #result=1
-file_exist;file_ssh3;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main2 && touch file_ssh3
-file_not_exist;file_exist ; scp -i /Users/Anastasia/key_nusc_school_2017.dat /Users/Anastasia/main1.cpp hpcuser29@clu.nusc.ru:~/ && touch file_exist
-file_ssh3;hello2.txt;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat ./main2 > hello2.txt && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main1.cpp && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat rm main2
+###### 3
 
+## START ***********************************************************************************
+    ;file_exist ; touch file_exist && \
+                  $SSH_con cat main1.cpp                      #result=0
+
+    ;file_not_exist ; touch file_not_exist && \
+                      $SSH_con cat main1.cpp                  #result=1
+
+    file_exist ; file_ssh3 ; $SSH_con gcc main1.cpp -o main2 && \
+                             touch file_ssh3
+
+    file_not_exist ; file_exist ; $SCP_con && \
+                                  touch file_exist
+
+    file_ssh3 ; example3.txt ; $SSH_con ./main2 > example3.txt && \
+                             $SSH_con rm main1.cpp && \
+                             $SSH_con rm main2
+## FINISH ***********************************************************************************
 
 ## пример запуска с отсутствием сипипи на сервере [вариант копирования]
-## remotelyСm.cm -o hello2.txt -s
+## remotelyСm.cm -o example3.txt -s
