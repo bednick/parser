@@ -25,7 +25,6 @@ main1;hello.txt;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_20
 ## remotelyСm.cm -o hello.txt -s
 
 ## 3
-
 ;file_exist;touch file_exist;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp              #result=0
 ;file_not_exist;touch file_not_exist && ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat cat main1.cpp   #result=1
 file_exist;file_ssh3;ssh hpcuser29@clu.nusc.ru -i /Users/Anastasia/key_nusc_school_2017.dat gcc main1.cpp -o main2 && touch file_ssh3
