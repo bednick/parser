@@ -130,12 +130,12 @@ public class Parser {
         List<String> allPath = new ArrayList<>();
         for(String path: configFile.getPathCM()) {
             try {
-                cmFile.readFile(path+"\\"+nameFile);
-                logCollector.addLine("NAME CM '" + path+"\\"+nameFile+ "'");
+                cmFile.readFile(path+"/"+nameFile);
+                logCollector.addLine("NAME CM '" + path+"/"+nameFile+ "'");
                 return true;
 
             } catch (IOException e) {
-                logCollector.addLine("Error path: " +path+"\\"+nameFile);
+                logCollector.addLine("Error path: " +path+"/"+nameFile);
             }
         }
         return false;
