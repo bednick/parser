@@ -45,6 +45,7 @@ public class ConfigFile {
         this.path_parser = path_parser;
         this.log = log;
         this.path_cm = new ArrayList<>();
+        path_cm.add(path_environment);
         try {
             readFile();
         } catch (IOException e) {
