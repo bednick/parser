@@ -54,7 +54,7 @@ public class Parser {
         path_parser = new File(Parser.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent();
 
         logCollector.addLine("\n\nSTART SYSTEM");
-        logCollector.addLine("OS = " + System.getProperty("os.name"));
+        logCollector.addLine("OS = " + System.getProperty("os.name") );
         logCollector.addLine("PATH_environment = "+path_environment);
         logCollector.addLine("PATH_parser      = "+path_parser);
         configFile = new ConfigFile(path_environment, path_parser, logCollector);
@@ -130,12 +130,12 @@ public class Parser {
         List<String> allPath = new ArrayList<>();
         for(String path: configFile.getPathCM()) {
             try {
-                cmFile.readFile(path+"/"+nameFile);
-                logCollector.addLine("NAME CM '" + path+"/"+nameFile+ "'");
+                cmFile.readFile(path+System.getProperty("file.separator")+nameFile);
+                logCollector.addLine("NAME CM '" + path+System.getProperty("file.separator")+nameFile+ "'");
                 return true;
 
             } catch (IOException e) {
-                logCollector.addLine("Error path: " +path+"/"+nameFile);
+                logCollector.addLine("Error path: " +path+System.getProperty("file.separator")+nameFile);
             }
         }
         return false;

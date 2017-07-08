@@ -18,7 +18,7 @@ import java.util.List;
  * ...
  */
 public class ConfigFile {
-    private static final String NAME_FILE = "settings/configuration.txt";
+    private static final String NAME_FILE = "settings"+System.getProperty("file.separator")+"configuration.txt";
 
     private static final String SPECIAL_PATH_SYMBOL = "$";
     private static final String NAME_PATH_ENVIRONMENT = "path_environment";
@@ -45,6 +45,7 @@ public class ConfigFile {
         this.path_parser = path_parser;
         this.log = log;
         this.path_cm = new ArrayList<>();
+        path_cm.add(path_environment);
         try {
             readFile();
         } catch (IOException e) {
@@ -54,7 +55,7 @@ public class ConfigFile {
     }
 
     private void readFile() throws IOException {
-        String[] names = {path_environment + "/" + NAME_FILE, path_parser + NAME_FILE};
+        String[] names = {path_environment + System.getProperty("file.separator") + NAME_FILE, path_parser + NAME_FILE};
         for (String name: names){
             if (readFile(name)) {
                 log.addLine("PATH CONFIGURATION: " + name);
