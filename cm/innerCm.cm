@@ -3,4 +3,4 @@
 /Users/Anastasia/exampleParser/main ; example0.txt ;  /Users/Anastasia/exampleParser/main >> example0.txt
 /Users/Anastasia/exampleParser/main1.cpp ; /Users/Anastasia/exampleParser/main1 ; gcc  /Users/Anastasia/exampleParser/main1.cpp -o /Users/Anastasia/exampleParser/main1
 /Users/Anastasia/exampleParser/main1 ; example1.txt ;  /Users/Anastasia/exampleParser/main1 >> example1.txt
-example0.txt example1.txt ; example.txt ; example0.txt >>  example.txt && example1.txt >>  example.txt
+example0.txt example1.txt ; example.txt ;  cat example0.txt >>  example.txt && cat example1.txt >>  example.txt
