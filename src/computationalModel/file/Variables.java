@@ -9,6 +9,7 @@ import java.util.Map;
  * Created by BODY on 06.07.2017.
  */
 public class Variables {
+    private static final String START_WITH = "#define ";
     private static final String MARK = "$";
     private Map<String, String> variables;
     private LogCollector log;
@@ -19,25 +20,33 @@ public class Variables {
     }
 
     void put(String line) {
-        if (line.startsWith("#define")) {
+        if (line.startsWith(START_WITH)) {
             String[] var = line.split(" ", 3);
-            variables.put(var[1], var[2]);
+            if (var.length == 3) {
+                variables.put(var[1], substitute(var[2]));
+            } else {
+                log.addLine("ERROR SYNTAX DEFINE: " + line);
+            }
         } else {
             log.addLine("ERROR LINE: " + line);
         }
     }
 
-    public String substitute(String command) {
+    String substitute(String line) {
         for(Map.Entry<String, String> entry : variables.entrySet()) {
             String key = entry.getKey();
-            if (command.contains(MARK+key)) {
-                command = command.replace(MARK+key, entry.getValue());
+            if (line.contains(MARK+key)) {
+                return substitute(line.replace(MARK+key, entry.getValue()));
             }
         }
-        return command;
+        return line;
     }
 
-    public boolean isVariable(String command) {
-        return command.contains(MARK);
+    String getStartWith() {
+        return START_WITH;
+    }
+
+    boolean isNeedSubstitute(String line) {
+        return line.contains(MARK);
     }
 }

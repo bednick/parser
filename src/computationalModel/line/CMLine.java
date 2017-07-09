@@ -22,15 +22,13 @@ public class CMLine implements Comparable<CMLine> {
     private Properties properties;
     private Flags flags;
 
-    public CMLine(String line, LogCollector log, Variables variables) {
+    public CMLine(String line, LogCollector log) {
         //todo пересивать всё на стримы
         try {
             this.in = Arrays.stream(((line.split(DELIMITER_ROLE, 3)[0]).split(DELIMITER))).filter(l -> !l.isEmpty()).toArray(String[]::new);
             this.out = Arrays.stream((line.split(DELIMITER_ROLE, 3)[1]).split(DELIMITER)).filter(l-> !l.isEmpty()).toArray(String[]::new);
             this.command = line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2)[0];
-            if (variables.isVariable(command)) {
-                this.command = variables.substitute(command);
-            }
+
             String[] comments;
             if (line.split(DELIMITER_ROLE, 3)[2].split(DELIMITER_COMMENT, 2).length == 1) {
                 comments = new String[0];

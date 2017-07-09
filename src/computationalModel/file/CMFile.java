@@ -18,60 +18,24 @@ public class CMFile {
     private ArrayList<CMLine> lines;
     private ArrayList<String> onlyInput;
     private LogCollector log;
-    // возможно вынести в класс?
-    private Variables variables;
 
     public CMFile(LogCollector log) {
         this.lines = new ArrayList<>();
         this.log = log;
-        this.variables = new Variables(log);
     }
 
     public CMFile(ArrayList<CMLine> lines, LogCollector log) {
         this.lines = lines;
         this.log = log;
-        this.variables = new Variables(log);
-        //this.setOnlyInput();
     }
 
     public void readFile(String nameFile) throws IOException {
-        /* Считываем файл, заполняем List из строк - CMLine
-         * Считывание построчное
-         * '\' - Символ переноса строки
-         * Строки начинающиеся с символов '##' игнорируются
-         * Строки начинающиеся с '#' расцениваются как переменные(Variables)
-         * */
-        String lastLine = Files.lines(Paths.get(nameFile), StandardCharsets.UTF_8)
-                .filter(line-> (line.length() == 1)
-                        || (line.length() >= 2 && line.charAt(0) != '#')
-                        || (line.length() >= 2 && line.charAt(0) == '#' && line.charAt(1) != '#'))
-                .reduce((line_1,line_2)-> {
-                    if (line_1.endsWith("\\")) {
-                        return line_1.substring(0, line_1.length()-1)+line_2;
-                    } else {
-                        processLine(line_1);
-                        return line_2;
-                    }
-                }).orElse("");
-
-        if (lastLine.isEmpty()) {
-            log.addLine("File '" + nameFile + "' is EMPTY");
-        } else {
-            if (lastLine.endsWith("\\")) {
-                processLine(lastLine.substring(0, lastLine.length()-1));
-            } else {
-                processLine(lastLine);
-            }
-        }
+        Reader reader = new Reader(this, log);
+        reader.readFile(nameFile);
     }
 
-    private void processLine(String line) {
-        if (line.startsWith("#")) {
-            variables.put(line);
-        } else {
-            lines.add(new CMLine(line, log, variables));
-        }
-
+    void add(CMLine cmLine) {
+        lines.add(cmLine);
     }
 
     public ArrayList<CMLine> getForIn(String name) {

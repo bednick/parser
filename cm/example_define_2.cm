@@ -3,11 +3,13 @@
 ## Далее, этот дефайн можно использовать с любой ПОСЛЕДУЮЩЕЙ КОМАНДЕ, поставив перед ним специальный символ '$'
 ##
 ## Пример:
-## example_define.cm -o out.txt -s
+## example_define_2.cm -o out.txt -s
 
-#define CREATE echo "example define" >> out.txt
+#define CREATE echo "example define 2" >> out.txt
+#define F1 file_1
+#define F2 file_2
 
-;file_1;echo .>file_1
-;file_2;echo .>file_2
+;$F1;echo .>file_1
+;file_2;echo .>$F2
 
 file_1 file_2;out.txt;$CREATE
