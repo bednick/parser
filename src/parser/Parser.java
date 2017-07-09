@@ -75,6 +75,7 @@ public class Parser {
             }
             if (readCMFiles() == 0) {
                 logCollector.addLine("FILES CM NOT FOUND");
+                System.err.println("FILES CM NOT FOUND");
                 return false;
             }
             if (parameters.isMemory()) {
@@ -367,12 +368,14 @@ public class Parser {
                 }
             }
             if (parser.start()) {
+                System.out.println("<Parser>:Successfully");
                 System.exit(0);
             } else {
+                System.out.println("<Parser>:Unsuccessfully");
                 System.exit(1);
             }
         } catch (IOException e) {
-            System.err.println("<Parser>" + e.toString());
+            System.err.println("<Parser>:" + e.toString());
             System.exit(2);
         }
         //HashMap<String, Integer> hashMap = new HashMap<>();

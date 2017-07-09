@@ -55,7 +55,10 @@ public class ConfigFile {
     }
 
     private void readFile() throws IOException {
-        String[] names = {path_environment + System.getProperty("file.separator") + NAME_FILE, path_parser + NAME_FILE};
+        String[] names = {
+                path_environment + System.getProperty("file.separator") + NAME_FILE,
+                path_parser + System.getProperty("file.separator") + NAME_FILE
+        };
         for (String name: names){
             if (readFile(name)) {
                 log.addLine("PATH CONFIGURATION: " + name);

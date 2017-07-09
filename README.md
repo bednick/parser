@@ -11,13 +11,13 @@
 
 ## Run an example: method 1.1
 1. `java -jar Parser.jar`
-2. `<Parser>: cm.cm -o out.txt -s`
+2. `<Parser>: example_start_working.cm -o out.txt -s`
 
 ## Run an example: method 1.2
 1. `java -jar Parser.jar`
 2. `<Parser>: -o out.txt`
-3. `<Parser>: cm.cm`
+3. `<Parser>: example_start_working.cm`
 4. `<Parser>: -s`
 
 ## Run an example: method 2
-1. `java -jar Parser.jar cm.cm -o out.txt`
+1. `java -jar Parser.jar example_start_working.cm -o out.txt`
