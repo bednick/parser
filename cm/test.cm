@@ -1,7 +1,10 @@
-## Проверка файлов меток
+## Проверка всего)
+
 ## test.cm -o out.txt -s
 
-#define CREATE echo "example test" >> out.txt
+
+#define MESSAGE "example test"
+#define CREATE echo $MESSAGE >> out.txt
 
 
 ;file_1_1;echo .>fi\

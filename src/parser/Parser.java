@@ -7,6 +7,8 @@ import computationalModel.tree.CMTreeVertex;
 import parser.performing.Perform;
 import parser.performing.PerformUnix;
 import parser.performing.PerformWin;
+import parser.view.View;
+import parser.view.ViewConsole;
 
 import java.io.*;
 import java.util.*;
@@ -31,14 +33,15 @@ public class Parser {
     private String path_environment;// путь к окружению
     private String path_parser;     // путь к *.jar
 
+    private View view;
 
-    public Parser() {
-        this.parameters = new Parameters();
+
+    public Parser(View view) {
+        this.view = view;
         this.lighthouse = new Lighthouse();
         this.logCollector = new LogCollector();
         this.cmFile = new CMFile(logCollector);
         this.rubbishCollector = new RubbishCollector(logCollector);
-        //this.configFile = new ConfigFile("");
         String os = System.getProperty("os.name" );
         if (os.contains("Win")) {
             perform = new PerformWin();
@@ -60,6 +63,10 @@ public class Parser {
         configFile = new ConfigFile(path_environment, path_parser, logCollector);
     }
 
+    public void setParameters(Parameters parameters) {
+        this.parameters = parameters;
+    }
+
     private boolean start() throws IOException {
         /*
         * Основная логика parser'а
@@ -75,7 +82,7 @@ public class Parser {
             }
             if (readCMFiles() == 0) {
                 logCollector.addLine("FILES CM NOT FOUND");
-                System.err.println("FILES CM NOT FOUND");
+                view.println("FILES CM NOT FOUND");
                 return false;
             }
             if (parameters.isMemory()) {
@@ -83,7 +90,6 @@ public class Parser {
             } else {
                 logCollector.addLine("OPTIMIZATION parameter : time");
             }
-            //configFile.updateCMFile(cmFile, logCollector);
             for (String nameOut : parameters.getNamesFileOut()) {
                 CMTree tree = new CMTree(cmFile, nameOut);
 
@@ -99,7 +105,7 @@ public class Parser {
                     logCollector.addLine("TREE:");
                     logCollector.addLine(tree.toString());
                     if (!isCanPerform) {
-                        System.out.println("FILE '" + nameOut + "' CAN NOT GET!");
+                        view.println("FILE '" + nameOut + "' CAN NOT GET!");
                         return false;
                     }
                     logCollector.push();
@@ -277,7 +283,6 @@ public class Parser {
                     }
 
                 }
-                //System.out.println("add rubb");
                 rubbishCollector.addRubbish(cmLine);
             }
             return rez;
@@ -359,88 +364,26 @@ public class Parser {
     }
 
     public static void main(String[] args) {
+        View view = new ViewConsole();
         try {
-            Parser parser = new Parser();
-            parser.parameters.addParameters(args);
-            if (args.length == 0) {
-                if (!view(parser)) {
-                    System.exit(1);
-                }
-            }
+            Parser parser = new Parser(view);
+            view.setParser(parser);
+            view.start(args);
+            parser.setParameters(view.getParameters());
             if (parser.start()) {
-                System.out.println("<Parser>:Successfully");
+                view.println("Successfully");
                 System.exit(0);
             } else {
-                System.out.println("<Parser>:Unsuccessfully");
+                view.println("Unsuccessfully");
                 System.exit(1);
             }
         } catch (IOException e) {
-            System.err.println("<Parser>:" + e.toString());
+            view.printError(e.getMessage());
             System.exit(2);
         }
-        //HashMap<String, Integer> hashMap = new HashMap<>();
-
     }
 
-    private static boolean view(Parser parser) throws IOException {
-        System.out.println("<Parser>: введите парамметры, для работы. Для запуска системы введите -s, для справки -h, для выхода -e");
-        while (true) {
-            BufferedReader streamIn = new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("<Parser>: ");
-            String[] inPar = streamIn.readLine().split(" ");
-            boolean flg_o = false;
-            boolean flg_s = false;
-            for (String str : inPar) {
-                switch (str) {
-                    case "-h":
-                    case "-H":
-                    case "--h":
-                    case "-help":
-                    case "--help":
-                        parser.parameters.printHelp();
-                        break;
-                    case "-o":
-                        flg_o = true;
-                        break;
-                    case "-t":
-                        parser.parameters.time = true;
-                        break;
-                    case "-m":
-                        parser.parameters.memory = true;
-                        break;
-                    case "-s":
-                        flg_s = true;
-                        break;
-                    case "--exit":
-                    case "-exit":
-                    case "-e":
-                        System.exit(0);
-                    default:
-                        if (flg_o) {
-                            parser.parameters.addFileOut(str);
-                            flg_o = false;
-                        } else {
-                            parser.parameters.addFileCM(str);
-                        }
-                        break;
-                }
-                if (flg_s) {
-                    break;
-                }
-            }
-            flg_o = false;
-            if (flg_s) {
-                if (parser.parameters.getNamesFileCM().size() == 0 || parser.parameters.getNamesFileOut().size() == 0) {
-                    System.out.println("<Parser>: Не указан fileOut или fileCM. Работа не возможна.");
-                    return false;
-                }
-                break;
-            }
-        }
-        return true;
-    }
-
-    class Parameters {
+    public static class Parameters {
         /* Хранит в себе все параметры,
         *
         * */
@@ -449,73 +392,41 @@ public class Parser {
         private ArrayList<String> namesFileCM;
         private ArrayList<String> namesFileOut;
 
-        Parameters() {
+        public Parameters() {
             namesFileCM = new ArrayList<>();
             namesFileOut = new ArrayList<>();
         }
 
-        void addParameters(String[] args) throws IOException {
-            boolean flg_o = false;
-            for (String str : args) {
-                switch (str) {
-                    case "-h":
-                    case "-H":
-                    case "--h":
-                    case "help":
-                        printHelp();
-                        break;
-                    case "-o":
-                        flg_o = true;
-                        break;
-                    case "-t":
-                        time = true;
-                        break;
-                    case "-m":
-                        memory = true;
-                        break;
-                    default:
-                        if (flg_o) {
-                            addFileOut(str);
-                            flg_o = false;
-                        } else {
-                            addFileCM(str);
-                        }
-                        break;
-                }
-            }
+        public void setTime(boolean time) {
+            this.time = time;
         }
 
-        void addFileCM(String nameFile) {
+        public void setMemory(boolean memory) {
+            this.memory = memory;
+        }
+
+        public void addFileCM(String nameFile) {
             namesFileCM.add(nameFile);
         }
 
-        void addFileOut(String nameFile) {
+        public void addFileOut(String nameFile) {
             namesFileOut.add(nameFile);
         }
 
-        boolean isTime() {
+        public boolean isTime() {
             return time;
         }
 
-        boolean isMemory() {
+        public boolean isMemory() {
             return memory;
         }
 
-        ArrayList<String> getNamesFileCM() {
+        public ArrayList<String> getNamesFileCM() {
             return namesFileCM;
         }
 
-        ArrayList<String> getNamesFileOut() {
+        public ArrayList<String> getNamesFileOut() {
             return namesFileOut;
-        }
-
-        void printHelp() {
-            System.out.println("<Parser>: Для работы parser'а доступны следующие входные параметры:");
-            System.out.println("<Parser>: -t  — Найти оптимальный путь по минимальному времени");
-            System.out.println("<Parser>: -m  — Найти оптимальный путь по минимальному расходу памяти");
-            System.out.println("<Parser>: -s  — запуск системы");
-            System.out.println("<Parser>: <nameFileCM>     — установить файл вычислительной модели");
-            System.out.println("<Parser>: -o <nameFileOut> — установить выходной файл работы системы");
         }
     }
 
