@@ -4,6 +4,6 @@
 
 
     ; innerCm.cm ; ./makeInnerCm.sh
-    innerCm.cm ; example.txt ; java -jar parser.jar innerCm.cm -o example.txt
+    innerCm.cm ; example.txt ; java -jar main.java.ru.old.parser.jar innerCm.cm -o example.txt
 
 ## recursiveCm.cm -o example.txt -s

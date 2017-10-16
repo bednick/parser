@@ -6,7 +6,7 @@
 3. [Apache Ant](https://ant.apache.org/)
 
 ## Install
-1. Clone this repo with: `git clone https://github.com/nikkollaii/parser.git`
+1. Clone this repo with: `git clone https://github.com/nikkollaii/main.java.ru.old.parser.git`
 2. Install: `ant only-jar`
 
 ## Run an example: method 1.1
