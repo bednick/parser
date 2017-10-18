@@ -1,4 +1,4 @@
-package main.java.ru.interior;
+package main.java.ru;
 
 /**
  * Created by BODY on 15.10.2017.

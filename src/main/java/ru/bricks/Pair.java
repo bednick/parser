@@ -1,4 +1,4 @@
-package main.java.ru.interior.bricks;
+package main.java.ru.bricks;
 
 /**
  * Created by BODY on 15.10.2017.

@@ -1,4 +1,4 @@
-package main.java.ru.interior.synthesizer;
+package main.java.ru.synthesizer;
 
 /**
  * Created by BODY on 15.10.2017.

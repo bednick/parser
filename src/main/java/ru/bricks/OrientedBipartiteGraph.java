@@ -1,4 +1,4 @@
-package main.java.ru.interior.bricks;
+package main.java.ru.bricks;
 
 import com.sun.istack.internal.NotNull;
 
