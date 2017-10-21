@@ -3,7 +3,7 @@
 ## test.cm -o out.txt -s
 
 
-#define MESSAGE "example test"
+#define      MESSAGE "example test"
 #define CREATE echo $MESSAGE >> out.txt
 
 
