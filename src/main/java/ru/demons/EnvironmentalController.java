@@ -9,12 +9,14 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created by BODY on 15.10.2017.
+ * использовать одиночку
  */
 public class EnvironmentalController {
+    private final String PATH_SETTINGS = "settings";
     private Set<String> marks;
     private List<File> pathEnvironment;
     private List<File> pathModels;
+    private File pathJar;
 
     public EnvironmentalController() {
         this.marks = new TreeSet<>();
@@ -22,7 +24,8 @@ public class EnvironmentalController {
         this.pathEnvironment.add(new File("."));
         this.pathModels = new ArrayList<>();
         this.pathModels.add(new File("."));
-        this.pathModels.add(new File(EnvironmentalController.class.getProtectionDomain().getCodeSource().getLocation().getPath()));
+        this.pathJar = new File(EnvironmentalController.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        this.pathModels.add(pathJar);
     }
 
     public void addPathEnvironment(String path) {
@@ -77,4 +80,18 @@ public class EnvironmentalController {
         }
         return check;
     }
+
+    public File getFileSettings(String name) {
+        File dir = new File(pathJar, PATH_SETTINGS);
+        return new File(dir, name);
+    }
+// А нужно ли?
+//    public File get(String name) {
+//        for (File dir: pathEnvironment) {
+//            File file = new File(dir, name);
+//            if (file.isFile()) {
+//                return file;
+//            }
+//        }
+//    }
 }
